@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_main">
+
+    <!-- First Message: "Welcome, Pleb" -->
+    <TextView
+        android:id="@+id/tvWelcomeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:text="@string/welcome_title"
+        android:textSize="32sp"
+        android:textColor="@color/text_primary"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:alpha="0"
+        android:visibility="gone"/>
+
+    <!-- Second Message: Long description -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="@dimen/spacing_large">
+
+            <TextView
+                android:id="@+id/tvWelcomeMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/welcome_long_message"
+                android:textSize="16sp"
+                android:textColor="@color/text_secondary"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:paddingStart="@dimen/spacing_large"
+                android:paddingEnd="@dimen/spacing_large"
+                android:alpha="0"
+                android:visibility="gone"/>
+
+            <!-- Buttons Container -->
+            <LinearLayout
+                android:id="@+id/llButtons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/spacing_xlarge"
+                android:alpha="0"
+                android:visibility="gone">
+
+                <!-- Learn More Button -->
+                <Button
+                    android:id="@+id/btnLearnMore"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/welcome_learn_more"
+                    android:textSize="14sp"
+                    android:textColor="@color/btn_background"
+                    android:fontFamily="sans-serif-medium"
+                    android:backgroundTint="@color/text_primary"
+                    android:layout_marginEnd="@dimen/spacing_small"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"/>
+
+                <!-- Continue Button -->
+                <Button
+                    android:id="@+id/btnContinue"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/welcome_continue"
+                    android:textSize="14sp"
+                    android:textColor="@color/btn_background"
+                    android:fontFamily="sans-serif-medium"
+                    android:backgroundTint="@color/selector_btn_pump"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</FrameLayout>

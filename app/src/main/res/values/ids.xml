@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Main Activity IDs -->
+    <item name="tvPrice" type="id"/>
+    <item name="tvLastUpdated" type="id"/>
+    <item name="switchDarkMode" type="id"/>
+    <item name="btnSetPumpAlert" type="id"/>
+    <item name="btnSetDumpAlert" type="id"/>
+    <item name="tvPumpAlertStatus" type="id"/>
+    <item name="tvDumpAlertStatus" type="id"/>
+    <item name="ivPumpIcon" type="id"/>
+    <item name="ivDumpIcon" type="id"/>
+    <item name="btnInfo" type="id"/>
+    <item name="btnAudioSettings" type="id"/>
+
+    <!-- Welcome Activity IDs -->
+    <item name="tvWelcomeTitle" type="id"/>
+    <item name="tvWelcomeMessage" type="id"/>
+    <item name="llButtons" type="id"/>
+    <item name="btnLearnMore" type="id"/>
+    <item name="btnContinue" type="id"/>
+
+    <!-- About Activity IDs -->
+    <item name="btnBack" type="id"/>
+    <item name="btnDonate" type="id"/>
+    <item name="tvNoWalletMessage" type="id"/>
+    <item name="tvLightningAddress" type="id"/>
+    <item name="btnLearnMoreWallets" type="id"/>
+
+    <!-- WebView Activity IDs -->
+    <item name="btnBackWeb" type="id"/>
+    <item name="webView" type="id"/>
+
+    <!-- Audio Settings Activity IDs -->
+    <item name="btnBackAudio" type="id"/>
+    <item name="tvPumpAudioStatus" type="id"/>
+    <item name="tvDumpAudioStatus" type="id"/>
+    <item name="btnSelectPumpAudio" type="id"/>
+    <item name="btnPlayPumpAudio" type="id"/>
+    <item name="btnResetPumpAudio" type="id"/>
+    <item name="btnSelectDumpAudio" type="id"/>
+    <item name="btnPlayDumpAudio" type="id"/>
+    <item name="btnResetDumpAudio" type="id"/>
+
+    <!-- Bottom Sheet Price Input IDs -->
+    <item name="tvBottomSheetTitle" type="id"/>
+    <item name="tvPriceInput" type="id"/>
+
+    <!-- Numpad Button IDs -->
+    <item name="btn0" type="id"/>
+    <item name="btn1" type="id"/>
+    <item name="btn2" type="id"/>
+    <item name="btn3" type="id"/>
+    <item name="btn4" type="id"/>
+    <item name="btn5" type="id"/>
+    <item name="btn6" type="id"/>
+    <item name="btn7" type="id"/>
+    <item name="btn8" type="id"/>
+    <item name="btn9" type="id"/>
+    <item name="btnClear" type="id"/>
+    <item name="btnBackspace" type="id"/>
+
+    <!-- Bottom Sheet Action Button IDs -->
+    <item name="btnCancel" type="id"/>
+    <item name="btnCreateAlert" type="id"/>
+
+    <!-- Widget IDs -->
+    <item name="widgetBackground" type="id"/>
+    <item name="widgetRoot" type="id"/>
+    <item name="tvWidgetPrice" type="id"/>
+</resources>

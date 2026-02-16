@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_main"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvBottomSheetTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test"
+        android:textSize="18sp"
+        android:textColor="@color/text_primary"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Price Display -->
+    <TextView
+        android:id="@+id/tvPriceInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/price_input_default"
+        android:textSize="32sp"
+        android:textColor="@color/text_primary"
+        android:fontFamily="sans-serif-thin"
+        android:gravity="center"
+        android:minHeight="50dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/input_field_surface"
+        android:padding="12dp"/>
+
+    <!-- Numpad Grid - Uses remaining space -->
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:columnCount="3"
+        android:rowCount="4"
+        android:layout_marginBottom="12dp">
+
+        <!-- Row 1: 1, 2, 3 -->
+        <Button
+            android:id="@+id/btn1"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_1"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btn2"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_2"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btn3"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_3"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+        <Button
+            android:id="@+id/btn4"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_4"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btn5"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_5"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btn6"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_6"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <!-- Row 3: 7, 8, 9 -->
+        <Button
+            android:id="@+id/btn7"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_7"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btn8"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            android:text="@string/numpad_8"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btn9"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_9"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <!-- Row 4: Clear, 0, Backspace -->
+        <Button
+            android:id="@+id/btnClear"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_clear"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-medium"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btn0"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_0"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btnBackspace"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="2dp"
+            android:text="@string/numpad_backspace"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-light"
+            android:backgroundTint="@color/input_field_surface"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+    </GridLayout>
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_cancel"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-medium"
+            android:backgroundTint="@color/input_field_surface"
+            android:layout_marginEnd="8dp"
+            style="?attr/materialButtonOutlinedStyle"/>
+
+        <Button
+            android:id="@+id/btnCreateAlert"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_create_alert"
+            android:textSize="16sp"
+            android:textColor="@color/btn_background"
+            android:fontFamily="sans-serif-medium"
+            android:backgroundTint="@color/text_primary"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

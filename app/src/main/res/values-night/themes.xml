@@ -1,0 +1,6 @@
+<resources>
+    <!-- Application theme -->
+    <style name="Theme.SatScream" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Night-specific overrides (optional) -->
+    </style>
+</resources>

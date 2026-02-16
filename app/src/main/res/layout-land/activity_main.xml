@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape layout for activity_main -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_main">
+
+    <!-- Scrollable content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:paddingBottom="@dimen/spacing_large">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingStart="@dimen/spacing_large"
+            android:paddingEnd="@dimen/spacing_large"
+            android:paddingTop="@dimen/spacing_medium"
+            android:paddingBottom="@dimen/spacing_large">
+
+            <!-- Left Column: Price Display -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginEnd="@dimen/spacing_large">
+
+                <!-- Main Price Display -->
+                <TextView
+                    android:id="@+id/tvPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/loading"
+                    android:textSize="48sp"
+                    android:fontFamily="sans-serif-thin"
+                    android:textColor="@color/text_primary"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.02"
+                    android:contentDescription="@string/desc_price_content"/>
+
+                <TextView
+                    android:id="@+id/tvLastUpdated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/last_updated_default"
+                    android:textSize="@dimen/text_small"
+                    android:textColor="@color/text_secondary"
+                    android:fontFamily="sans-serif-light"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:importantForAccessibility="yes"/>
+
+            </LinearLayout>
+
+            <!-- Right Column: Alert Controls -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_medium"
+                    android:text="@string/header_configuration"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_small"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.15"/>
+
+                <!-- Alert Buttons Side by Side -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="@dimen/spacing_large">
+
+                    <!-- Pump Alert Column -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:layout_marginEnd="8dp">
+
+                        <Button
+                            android:id="@+id/btnSetPumpAlert"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/btn_set_pump"
+                            android:textSize="@dimen/text_body"
+                            android:backgroundTint="@color/selector_btn_pump"
+                            android:textColor="@color/btn_background"
+                            android:fontFamily="sans-serif-medium"
+                            android:minHeight="@dimen/min_touch_target"
+                            android:stateListAnimator="@null"
+                            android:layout_marginBottom="@dimen/spacing_small" />
+
+                        <TextView
+                            android:id="@+id/tvPumpAlertStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/status_pump_none"
+                            android:textSize="@dimen/text_small"
+                            android:textColor="@color/text_tertiary"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center"
+                            android:textAlignment="center"/>
+
+                    </LinearLayout>
+
+                    <!-- Dump Alert Column -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:layout_marginStart="8dp">
+
+                        <Button
+                            android:id="@+id/btnSetDumpAlert"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/btn_set_dump"
+                            android:textSize="@dimen/text_body"
+                            android:backgroundTint="@color/selector_btn_dump"
+                            android:textColor="@color/btn_background"
+                            android:fontFamily="sans-serif-medium"
+                            android:minHeight="@dimen/min_touch_target"
+                            android:stateListAnimator="@null"
+                            android:layout_marginBottom="@dimen/spacing_small"/>
+
+                        <TextView
+                            android:id="@+id/tvDumpAlertStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/status_dump_none"
+                            android:textSize="@dimen/text_small"
+                            android:textColor="@color/text_tertiary"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center"
+                            android:textAlignment="center"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Dark Mode Toggle - Fixed at bottom right -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom|end"
+        android:padding="@dimen/spacing_medium"
+        android:background="@color/background_main">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dark Mode"
+            android:textSize="@dimen/text_small"
+            android:textColor="@color/text_secondary"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/spacing_small"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchDarkMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:thumbTint="@color/switch_thumb_color"
+            app:trackTint="@color/switch_track_color" />
+    </LinearLayout>
+
+</FrameLayout>

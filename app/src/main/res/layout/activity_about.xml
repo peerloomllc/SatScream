@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_main"
+    android:padding="@dimen/spacing_large">
+
+    <!-- Back Button - Pushed down from top -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="@dimen/spacing_xlarge"
+        android:layout_marginBottom="@dimen/spacing_xlarge"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="@string/btn_back"
+        android:tint="@color/text_primary"/>
+
+    <!-- Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about_greeting"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/spacing_medium"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about_donate"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/spacing_small"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about_stack_sats"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"/>
+
+        <!-- Donate Button -->
+        <Button
+            android:id="@+id/btnDonate"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_donate"
+            android:textSize="16sp"
+            android:textColor="@color/btn_background"
+            android:fontFamily="sans-serif-medium"
+            android:backgroundTint="@color/text_primary"
+            android:layout_marginTop="@dimen/spacing_large"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"/>
+
+        <!-- Message 1: No wallet detected -->
+        <TextView
+            android:id="@+id/tvNoWalletMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_wallet_message"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:layout_marginTop="@dimen/spacing_medium"
+            android:paddingStart="@dimen/spacing_large"
+            android:paddingEnd="@dimen/spacing_large"
+            android:visibility="gone"
+            android:alpha="0"
+            android:autoLink="web"
+            android:linksClickable="true"/>
+
+        <!-- Learn More Button -->
+        <Button
+            android:id="@+id/btnLearnMoreWallets"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="@string/learn_more_wallets"
+            android:textSize="14sp"
+            android:textColor="@color/btn_background"
+            android:fontFamily="sans-serif-medium"
+            android:backgroundTint="@color/text_primary"
+            android:layout_marginTop="@dimen/spacing_medium"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:visibility="gone"
+            android:alpha="0"/>
+
+        <!-- Message 2: Lightning address -->
+        <TextView
+            android:id="@+id/tvLightningAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:layout_marginTop="@dimen/spacing_medium"
+            android:paddingStart="@dimen/spacing_large"
+            android:paddingEnd="@dimen/spacing_large"
+            android:visibility="gone"
+            android:alpha="0"/>
+
+    </LinearLayout>
+
+</LinearLayout>

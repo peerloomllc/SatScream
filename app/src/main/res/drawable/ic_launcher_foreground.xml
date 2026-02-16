@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Rotate the whole symbol –10° (tilt left) -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:rotation="-10">
+
+        <!-- Circle background for the symbol (optional – you can omit if you want a fully transparent foreground) -->
+        <path
+            android:fillColor="#00FFFFFF"
+            android:pathData="M0,0h108v108h-108z" />
+
+        <!-- Bitcoin “B” shape – orange -->
+        <path
+            android:fillColor="#FF9800"
+            android:pathData="
+                M71.2,46.1c0.4,-2.5 0.7,-5 0.7,-7.6c0,-2.6 -0.3,-5.1 -0.7,-7.6h10.3v-8.7h-9.9c-1.4,-6.6 -3.5,-12.8 -6.2,-18.5l-8.6,4c2.5,5.4 4.5,11.2 5.8,17.5h-20.7c1.3,-6.3 3.3,-12.1 5.8,-17.5l-8.6,-4c-2.7,5.7 -4.8,11.9 -6.2,18.5h-9.9v8.7h10.3c-0.4,2.5 -0.7,5 -0.7,7.6c0,2.6 0.3,5.1 0.7,7.6h-10.3v8.7h9.9c1.4,6.6 3.5,12.8 6.2,18.5l8.6,-4c-2.5,-5.4 -4.5,-11.2 -5.8,-17.5h20.7c-1.3,6.3 -3.3,12.1 -5.8,17.5l8.6,4c2.7,-5.7 4.8,-11.9 6.2,-18.5h9.9v-8.7h-10.3zm-30.8,0c-4.4,0 -8,-3.6 -8,-8c0,-4.4 3.6,-8 8,-8c4.4,0 8,3.6 8,8c0,4.4 -3.6,8 -8,8zm24.5,0c-4.4,0 -8,-3.6 -8,-8c0,-4.4 3.6,-8 8,-8c4.4,0 8,3.6 8,8c0,4.4 -3.6,8 -8,8z" />
+    </group>
+</vector>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Use Lightning Network</title>
+    <style>
+        /* Light Mode (Default) */
+        :root {
+            --background-main: #FFFFFF;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --text-tertiary: #9E9E9E;
+            --card-background: #F5F5F5;
+            --border-color: #E0E0E0;
+            --link-color: #1976D2;
+            --accent-color: #4CAF50;
+        }
+
+        /* Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-main: #121212;
+                --text-primary: #E0E0E0;
+                --text-secondary: #B0B0B0;
+                --text-tertiary: #808080;
+                --card-background: #1E1E1E;
+                --border-color: #333333;
+                --link-color: #64B5F6;
+                --accent-color: #66BB6A;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--background-main);
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-family: sans-serif-medium, sans-serif;
+            font-weight: 500;
+        }
+
+        h2 {
+            color: var(--text-primary);
+            font-size: 1.8em;
+            margin-top: 40px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            font-family: sans-serif-medium, sans-serif;
+            font-weight: 500;
+        }
+
+        h3 {
+            color: var(--text-secondary);
+            font-size: 1.3em;
+            margin-top: 30px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        p {
+            color: var(--text-secondary);
+        }
+
+        .wallet-list {
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .wallet-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: var(--background-main);
+            border-left: 4px solid var(--accent-color);
+            border-radius: 4px;
+        }
+
+        .wallet-item a {
+            color: var(--link-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1em;
+            font-family: sans-serif-medium, sans-serif;
+        }
+
+        .wallet-item a:hover {
+            text-decoration: underline;
+        }
+
+        .wallet-description {
+            color: var(--text-secondary);
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .section-description {
+            background: var(--card-background);
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .section-description p {
+            color: var(--text-secondary);
+            margin: 8px 0;
+        }
+
+        .resources {
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .resources a {
+            display: block;
+            color: var(--link-color);
+            margin: 10px 0;
+            text-decoration: none;
+        }
+
+        .resources a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--text-tertiary);
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: var(--link-color);
+        }
+    </style>
+</head>
+<body>
+<h1>Use the Bitcoin Lightning Network</h1>
+<p class="subtitle">Scalable, Instant Bitcoin/Blockchain Transactions</p>
+
+<h2>What is the Bitcoin Lightning Network?</h2>
+<p>Bitcoin's Lightning Network is a technical innovation that allows its users to send bitcoin faster and more cheaply than if they were using Bitcoin's primary network.</p>
+
+<h2>How to use the Bitcoin Lightning Network?</h2>
+<p>To start making and accepting payments on Bitcoin Lightning Network you need to install a wallet with Bitcoin Lightning Network support.</p>
+
+<h2>Custodial Wallets</h2>
+<div class="section-description">
+    <p>When using custodial wallets, the wallet company has the ownership of your keys, which means you have to trust them not to run away with your money.</p>
+    <p>Custodial wallets offer quick and simple on-boarding, which is great for beginners and as a first introduction into the Bitcoin Lightning Network.</p>
+</div>
+
+<div class="wallet-list">
+    <div class="wallet-item">
+        <a href="https://strike.me/" target="_blank">Strike</a>
+        <p class="wallet-description">Lightning wallet for iOS and Android.</p>
+    </div>
+
+    <div class="wallet-item">
+        <a href="https://www.walletofsatoshi.com/" target="_blank">Wallet of Satoshi</a>
+        <p class="wallet-description">Bitcoin and Lightning wallet for iOS and Android.</p>
+    </div>
+</div>
+
+<h2>Non-Custodial Wallets</h2>
+<div class="section-description">
+    <p>Non-custodial wallets allow the user to take full ownership of his/her bitcoins.</p>
+    <p>Some non-custodial wallets use built-in/running Lightning node or may require to connect to a remote node and is more appropriate for more experienced users.</p>
+</div>
+
+<div class="wallet-list">
+
+    <div class="wallet-item">
+        <a href="https://bitkit.to/" target="_blank">BitKit</a>
+        <p class="wallet-description">Lightning wallet for iOS and Android.</p>
+    </div>
+
+    <div class="wallet-item">
+        <a href="https://breez.technology/" target="_blank">Breez</a>
+        <p class="wallet-description">Lightning wallet for iOS and Android.</p>
+    </div>
+
+    <div class="wallet-item">
+        <a href="https://blixtwallet.github.io/" target="_blank">Blixt Wallet</a>
+        <p class="wallet-description">Open source Bitcoin and Lightning wallet for iOS and Android.</p>
+    </div>
+
+    <div class="wallet-item">
+        <a href="https://bluewallet.io/" target="_blank">Blue Wallet</a>
+        <p class="wallet-description">Open source Bitcoin and Lightning wallet for iOS, Android and Desktop.</p>
+    </div>
+
+    <div class="wallet-item">
+        <a href="https://muun.com/" target="_blank">Muun</a>
+        <p class="wallet-description">Lightning wallet for iOS and Android.</p>
+    </div>
+
+    <div class="wallet-item">
+        <a href="https://phoenix.acinq.co/" target="_blank">Phoenix</a>
+        <p class="wallet-description">Lightning wallet for Android.</p>
+    </div>
+
+    <div class="wallet-item">
+        <a href="https://zeusln.com/" target="_blank">Zeus</a>
+        <p class="wallet-description">Lightning wallet for iOS and Android.</p>
+    </div>
+</div>
+
+<h2>More Resources</h2>
+<div class="resources">
+    <a href="https://www.youtube.com/watch?v=rrr_zPmEiME" target="_blank">Video: Bitcoin's Lightning Network, Simply Explained!</a>
+    <a href="https://www.youtube.com/watch?v=rrr_zPmEiME" target="_blank">Video: Non-Technical: Lightning Network Explained</a>
+    <a href="https://github.com/bcongdon/awesome-lightning-network" target="_blank">A Curated List of Awesome Lightning Network Resources</a>
+</div>
+
+<div class="footer">
+
+</div>
+</body>
+</html>

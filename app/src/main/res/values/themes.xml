@@ -1,0 +1,18 @@
+<resources>
+
+    <!-- Light, high-contrast MaterialComponents theme -->
+    <style name="Theme.SatScream" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Primary configs, hook these up to your colors.xml -->
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">@color/divider_line</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <item name="android:statusBarColor">@color/black</item>
+
+        <!-- Background / surface colors -->
+        <item name="android:colorBackground">@color/background_main</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+    </style>
+
+</resources>

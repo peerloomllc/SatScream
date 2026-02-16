@@ -1,0 +1,81 @@
+<resources>
+    <string name="app_name">SatScream</string>
+
+    <!-- Common UI Strings -->
+    <string name="dark_mode">Dark Mode</string>
+    <string name="back">Back</string>
+    <string name="information">Information</string>
+    <string name="audio_settings">Audio Settings</string>
+    <string name="pump_alert_icon">Pump alert icon</string>
+    <string name="dump_alert_icon">Dump alert icon</string>
+
+    <!-- Widget -->
+    <string name="widget_description">Shows current Bitcoin price</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_title">Welcome</string>
+    <string name="welcome_long_message">Thanks for downloading my app. This is meant to be a simple, fun and consistent BTC price alert app that lets you set up custom audio alerts for price targets. No bloat, no ads. If you are already convinced bitcoin is the best monetary technology then get started setting up your alerts. If you are new to bitcoin or are not yet convinced, please consider doing more research and seeing how deep the rabbit hole goes. Stay humble, stack sats.</string>
+    <string name="welcome_learn_more">Learn More</string>
+    <string name="welcome_continue">Continue</string>
+
+    <!-- Status Strings -->
+    <string name="loading">Loading…</string>
+    <string name="last_updated_default">Last updated: —</string>
+    <string name="desc_price_content">Current Bitcoin Price</string>
+    <string name="header_configuration">Set your price targets</string>
+
+    <!-- Pump Section -->
+    <string name="hint_pump_target">Pump Target ($)</string>
+    <string name="btn_set_pump">Set Pump Alert</string>
+    <string name="status_pump_none">No pump alert set</string>
+
+    <!-- Dump Section -->
+    <string name="hint_dump_target">Dump Target ($)</string>
+    <string name="btn_set_dump">Set Dump Alert</string>
+    <string name="status_dump_none">No dump alert set</string>
+
+    <!-- Bottom Sheet Price Input -->
+    <string name="bottom_sheet_title_pump">Set Pump Alert</string>
+    <string name="bottom_sheet_title_dump">Set Dump Alert</string>
+    <string name="price_input_default">$0</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_create_alert">Create Alert</string>
+    <string name="numpad_clear">C</string>
+    <string name="numpad_backspace">⌫</string>
+
+    <!-- Pump/Dump Hit Icons -->
+    <string name="icon_pump_hit">🚀</string>
+    <string name="icon_dump_hit">🔻</string>
+
+    <!-- About Page -->
+    <string name="btn_back">Back</string>
+    <string name="about_greeting">Hey there, Pleb.</string>
+    <string name="about_stack_sats">Stay humble, stack sats.</string>
+    <string name="about_donate">Please consider donating if you receive value from this app.</string>
+    <string name="btn_donate">⚡ Donate</string>
+    <string name="lightning_address">timmy2383@strike.me</string>
+    <string name="no_wallet_message">It looks like you may not have a compatible Bitcoin Lightning wallet installed. Consider installing one today.</string>
+    <string name="lightning_address_message">Donations can be sent to&#160;</string>
+    <string name="learn_more_wallets">Learn more about Lightning wallets</string>
+
+    <!-- Audio Settings Page -->
+    <string name="audio_settings_title">Audio Settings</string>
+    <string name="pump_alert_audio">Pump Alert Audio</string>
+    <string name="dump_alert_audio">Dump Alert Audio</string>
+    <string name="select_audio">Select Audio</string>
+    <string name="play_audio">Play</string>
+    <string name="reset_to_default">Use Default</string>
+    <string name="using_default_audio">Using default audio</string>
+
+    <!-- Numpad Numbers -->
+    <string name="numpad_0">0</string>
+    <string name="numpad_1">1</string>
+    <string name="numpad_2">2</string>
+    <string name="numpad_3">3</string>
+    <string name="numpad_4">4</string>
+    <string name="numpad_5">5</string>
+    <string name="numpad_6">6</string>
+    <string name="numpad_7">7</string>
+    <string name="numpad_8">8</string>
+    <string name="numpad_9">9</string>
+</resources>

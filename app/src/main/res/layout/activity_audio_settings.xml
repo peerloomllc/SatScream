@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_main">
+
+    <!-- Header with Back Button -->
+    <ImageButton
+        android:id="@+id/btnBackAudio"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="@dimen/spacing_large"
+        android:layout_marginStart="@dimen/spacing_medium"
+        android:layout_marginBottom="@dimen/spacing_small"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="@string/back"
+        android:tint="@color/text_primary"/>
+
+    <!-- Scrollable Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <!-- Centered Content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="@dimen/spacing_large">
+
+            <!-- Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/audio_settings_title"
+                android:textSize="28sp"
+                android:textColor="@color/text_primary"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:layout_marginBottom="@dimen/spacing_xlarge"/>
+
+            <!-- Pump Alert Audio Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/spacing_xlarge"
+                android:paddingStart="@dimen/spacing_large"
+                android:paddingEnd="@dimen/spacing_large">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pump_alert_audio"
+                    android:textSize="20sp"
+                    android:textColor="@color/text_primary"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:layout_marginBottom="@dimen/spacing_small"/>
+
+                <TextView
+                    android:id="@+id/tvPumpAudioStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/using_default_audio"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/spacing_medium"
+                    android:paddingEnd="@dimen/spacing_medium"
+                    android:layout_marginBottom="@dimen/spacing_medium"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <!-- First row: Select and Reset buttons -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginBottom="@dimen/spacing_small">
+
+                        <Button
+                            android:id="@+id/btnSelectPumpAudio"
+                            android:layout_width="130dp"
+                            android:layout_height="56dp"
+                            android:text="@string/select_audio"
+                            android:textSize="14sp"
+                            android:textColor="@color/btn_background"
+                            android:backgroundTint="@color/selector_btn_pump"
+                            android:fontFamily="sans-serif-medium"
+                            android:stateListAnimator="@null"
+                            android:layout_marginEnd="@dimen/spacing_small"/>
+
+                        <Button
+                            android:id="@+id/btnResetPumpAudio"
+                            android:layout_width="130dp"
+                            android:layout_height="56dp"
+                            android:text="@string/reset_to_default"
+                            android:textSize="14sp"
+                            android:textColor="@color/btn_background"
+                            android:backgroundTint="@color/text_primary"
+                            android:fontFamily="sans-serif-medium"
+                            android:stateListAnimator="@null"/>
+
+                    </LinearLayout>
+
+                    <!-- Second row: Play button centered -->
+                    <ImageButton
+                        android:id="@+id/btnPlayPumpAudio"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:src="@android:drawable/ic_media_play"
+                        android:contentDescription="@string/play_audio"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:tint="@color/text_primary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Dump Alert Audio Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:paddingStart="@dimen/spacing_large"
+                android:paddingEnd="@dimen/spacing_large">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dump_alert_audio"
+                    android:textSize="20sp"
+                    android:textColor="@color/text_primary"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:layout_marginBottom="@dimen/spacing_small"/>
+
+                <TextView
+                    android:id="@+id/tvDumpAudioStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/using_default_audio"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/spacing_medium"
+                    android:paddingEnd="@dimen/spacing_medium"
+                    android:layout_marginBottom="@dimen/spacing_medium"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <!-- First row: Select and Reset buttons -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginBottom="@dimen/spacing_small">
+
+                        <Button
+                            android:id="@+id/btnSelectDumpAudio"
+                            android:layout_width="130dp"
+                            android:layout_height="56dp"
+                            android:text="@string/select_audio"
+                            android:textSize="14sp"
+                            android:textColor="@color/btn_background"
+                            android:backgroundTint="@color/selector_btn_dump"
+                            android:fontFamily="sans-serif-medium"
+                            android:stateListAnimator="@null"
+                            android:layout_marginEnd="@dimen/spacing_small"/>
+
+                        <Button
+                            android:id="@+id/btnResetDumpAudio"
+                            android:layout_width="130dp"
+                            android:layout_height="56dp"
+                            android:text="@string/reset_to_default"
+                            android:textSize="14sp"
+                            android:textColor="@color/btn_background"
+                            android:backgroundTint="@color/text_primary"
+                            android:fontFamily="sans-serif-medium"
+                            android:stateListAnimator="@null"/>
+
+                    </LinearLayout>
+
+                    <!-- Second row: Play button centered -->
+                    <ImageButton
+                        android:id="@+id/btnPlayDumpAudio"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:src="@android:drawable/ic_media_play"
+                        android:contentDescription="@string/play_audio"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:tint="@color/text_primary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
