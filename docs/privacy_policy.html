@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy – SatScream</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0A0A0A;
+            --white: #FFFFFF;
+            --off-white: #F0F0F0;
+            --mid: #888888;
+            --dim: #333333;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--off-white);
+            /* Roboto Thin mirrors Android's sans-serif-thin used for tvPrice */
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        /* ── HEADER ── */
+        header {
+            padding: 3rem 4rem 2.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .icon-wrap {
+            width: 96px;
+            height: 96px;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(255,255,255,0.08), 0 0 80px rgba(255,255,255,0.04);
+        }
+
+        .icon-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .app-name {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+            font-size: 1.6rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--white);
+        }
+
+        /* ── HERO ── */
+        .hero {
+            text-align: center;
+            padding: 5rem 4rem 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .eyebrow {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--mid);
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        h1 {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 1.0;
+            letter-spacing: -0.02em;
+            color: var(--white);
+            margin-bottom: 2.5rem;
+        }
+
+        h1 strong {
+            font-weight: 500;
+        }
+
+        .meta-row {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            color: var(--mid);
+            text-transform: uppercase;
+        }
+
+        .meta-row span {
+            color: var(--white);
+            font-weight: 300;
+        }
+
+        /* ── MAIN CONTENT ── */
+        main {
+            max-width: 740px;
+            margin: 0 auto;
+            padding: 5rem 4rem 8rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+            padding-bottom: 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        h2 {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+            font-size: 0.7rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--mid);
+            margin-bottom: 1.25rem;
+        }
+
+        p {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            font-size: 1rem;
+            color: var(--off-white);
+            margin-bottom: 1rem;
+        }
+
+        p:last-child { margin-bottom: 0; }
+
+        .callout {
+            border: 1px solid var(--border);
+            border-left: 2px solid var(--white);
+            padding: 1.25rem 1.75rem;
+            margin: 1.75rem 0;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .callout p {
+            font-weight: 300;
+            color: var(--white);
+            margin: 0;
+        }
+
+        ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        ul li {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            font-size: 0.95rem;
+            color: var(--off-white);
+            padding: 0.6rem 0 0.6rem 1.5rem;
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        ul li:last-child { border-bottom: none; }
+
+        ul li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--mid);
+            font-weight: 100;
+        }
+
+        strong.inline {
+            font-weight: 300;
+            color: var(--white);
+        }
+
+        a {
+            color: var(--white);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border);
+            transition: border-color 0.2s;
+        }
+
+        a:hover { border-color: var(--white); }
+
+        .contact-block {
+            border: 1px solid var(--border);
+            padding: 1.5rem 1.75rem;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            font-size: 0.85rem;
+            color: var(--mid);
+            line-height: 2;
+        }
+
+        .contact-block strong {
+            font-weight: 300;
+            color: var(--white);
+            display: block;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 4rem;
+            text-align: center;
+        }
+
+        footer p {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--mid);
+            margin: 0;
+        }
+
+        footer p span {
+            color: var(--white);
+            font-weight: 300;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            header { padding: 2rem 1.5rem; }
+            .hero { padding: 3rem 1.5rem 3rem; }
+            main { padding: 3rem 1.5rem 5rem; }
+            footer { padding: 2rem 1.5rem; }
+            h1 { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="icon-wrap">
+        <img src="icon2.png" alt="SatScream icon"/>
+    </div>
+    <div class="app-name">SatScream</div>
+</header>
+
+<div class="hero">
+    <span class="eyebrow">Legal Document</span>
+    <h1>Privacy<br><strong>Policy</strong></h1>
+    <div class="meta-row">
+        Effective Date: <span>2025</span>
+        &nbsp;&nbsp;·&nbsp;&nbsp;
+        Version: <span>1.0</span>
+    </div>
+</div>
+
+<main>
+
+    <div class="section">
+        <h2>Overview</h2>
+        <p>SatScream is a simple Bitcoin price alert app. We believe in your right to privacy, which is why we built this app to operate entirely on your device without collecting, storing, or transmitting any personal information.</p>
+        <div class="callout">
+            <p>We don't collect your data. We don't track you. We don't sell anything about you. SatScream is just a Bitcoin price tracker — nothing more.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Data We Do Not Collect</h2>
+        <p>SatScream does not collect, store, transmit, or share any of the following:</p>
+        <ul>
+            <li>Personal identifiers (name, email, phone number)</li>
+            <li>Location data</li>
+            <li>Device identifiers or advertising IDs</li>
+            <li>Usage analytics or behavioral data</li>
+            <li>Financial information</li>
+            <li>Contacts or camera data</li>
+            <li>Crash reports or diagnostics sent to us</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>What the App Does</h2>
+        <p>SatScream performs the following functions, all locally on your device:</p>
+        <ul>
+            <li>Fetches Bitcoin price data from public APIs (CoinGecko and Coinbase)</li>
+            <li>Stores your alert targets, theme preference, and audio settings in local device storage</li>
+            <li>Plays audio alerts when your price targets are reached</li>
+            <li>Displays a home screen widget showing the current Bitcoin price</li>
+            <li>Sends local notifications when price alerts are triggered</li>
+        </ul>
+        <p>All preferences and settings are stored locally using Android SharedPreferences. This data never leaves your device.</p>
+    </div>
+
+    <div class="section">
+        <h2>Internet Access</h2>
+        <p>SatScream requires internet access solely to fetch the current Bitcoin price from public APIs. Requests are made to:</p>
+        <ul>
+            <li>CoinGecko — <a href="https://api.coingecko.com" target="_blank">api.coingecko.com</a></li>
+            <li>Coinbase — <a href="https://api.coinbase.com" target="_blank">api.coinbase.com</a></li>
+        </ul>
+        <p>These are public, unauthenticated endpoints. No personal data is sent in these requests. We encourage you to review the privacy policies of these third-party services.</p>
+    </div>
+
+    <div class="section">
+        <h2>Permissions Explained</h2>
+        <p>SatScream requests the following Android permissions:</p>
+        <ul>
+            <li><strong class="inline">INTERNET</strong> — Required to fetch Bitcoin price data from public APIs</li>
+            <li><strong class="inline">POST_NOTIFICATIONS</strong> — Required to send price alert notifications when your targets are hit</li>
+            <li><strong class="inline">FOREGROUND_SERVICE</strong> — Required to run the background price monitoring service</li>
+            <li><strong class="inline">READ_EXTERNAL_STORAGE</strong> — Required only if you choose to select a custom audio file for alerts</li>
+        </ul>
+        <p>None of these permissions are used to collect or transmit personal data.</p>
+    </div>
+
+    <div class="section">
+        <h2>Children's Privacy</h2>
+        <p>SatScream is not directed at children under the age of 13. We do not knowingly collect personal information from children. Since we collect no personal data from any user, this applies equally to all age groups.</p>
+    </div>
+
+    <div class="section">
+        <h2>Changes to This Policy</h2>
+        <p>If we make material changes to this privacy policy, we will update the effective date at the top of this document. Continued use of SatScream after any changes constitutes acceptance of the updated policy.</p>
+    </div>
+
+    <div class="section">
+        <h2>Contact</h2>
+        <p>Questions about this privacy policy? Reach us at:</p>
+        <div class="contact-block">
+            <strong>SatScream Support</strong>
+            peerloomllc@proton.me
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Philosophy</h2>
+        <p>Bitcoin is built on the principle of self-sovereignty. SatScream is built on the same principle — your device, your data, your alerts.</p>
+        <div class="callout">
+            <p>Stay humble, stack sats. ⚡</p>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <p>© 2025 <span>SatScream</span> &nbsp;·&nbsp; No data collected. <span>Ever.</span></p>
+</footer>
+
+</body>
+</html>
