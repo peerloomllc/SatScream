@@ -1,7 +1,6 @@
 package com.example.satscream
 
 import android.Manifest
-import com.example.satscream.R
 import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.content.Intent
@@ -24,7 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 

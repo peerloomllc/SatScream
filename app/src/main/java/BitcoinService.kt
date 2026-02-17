@@ -452,7 +452,7 @@ class BitcoinService : Service() {
                     mediaPlayer?.setDataSource(customAudioPath)
                     mediaPlayer?.prepare()
                     mediaPlayer?.start()
-                    android.util.Log.d("BitcoinService", "Playing custom ${if (isPump) "pump" else "dump"} audio: $customAudioPath")
+
                     return
                 } catch (e: Exception) {
                     android.util.Log.e("BitcoinService", "Error playing custom audio, falling back to default", e)
@@ -465,7 +465,7 @@ class BitcoinService : Service() {
             // Use default audio from assets
             try {
                 val assetFileName = if (isPump) "pump.wav" else "dump.wav"
-                android.util.Log.d("BitcoinService", "Attempting to play default audio: $assetFileName")
+
 
                 val afd = assets.openFd(assetFileName)
 
@@ -475,7 +475,7 @@ class BitcoinService : Service() {
 
                 mediaPlayer?.prepare()
                 mediaPlayer?.start()
-                android.util.Log.d("BitcoinService", "Successfully playing default ${if (isPump) "pump" else "dump"} audio")
+
             } catch (e: Exception) {
                 android.util.Log.e("BitcoinService", "Error playing default audio from assets", e)
                 mediaPlayer?.release()
