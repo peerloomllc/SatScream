@@ -1,4 +1,4 @@
-package com.example.satscream
+package com.peerloomllc.satscream
 
 import android.media.MediaPlayer
 import android.net.Uri

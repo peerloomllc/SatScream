@@ -1,4 +1,4 @@
-package com.example.satscream.ui.theme
+package com.peerloomllc.satscream.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

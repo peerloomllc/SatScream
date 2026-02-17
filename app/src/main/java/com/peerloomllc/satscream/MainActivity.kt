@@ -1,6 +1,7 @@
-package com.example.satscream
+package com.peerloomllc.satscream
 
 import android.Manifest
+import com.peerloomllc.satscream.R
 import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.content.Intent

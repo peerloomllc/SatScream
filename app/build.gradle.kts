@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.satscream"
+    namespace = "com.peerloomllc.satscream"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.satscream"
+        applicationId = "com.peerloomllc.satscream"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

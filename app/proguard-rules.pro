@@ -24,4 +24,4 @@
 }
 
 # Keep widget classes
--keep class com.example.satscream.BitcoinWidget { *; }
+-keep class com.peerloomllc.satscream.BitcoinWidget { *; }

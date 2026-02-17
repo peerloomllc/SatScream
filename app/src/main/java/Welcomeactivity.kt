@@ -1,4 +1,4 @@
-package com.example.satscream
+package com.peerloomllc.satscream
 
 import android.content.Intent
 import android.net.Uri

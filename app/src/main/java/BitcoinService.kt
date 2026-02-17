@@ -1,4 +1,4 @@
-package com.example.satscream
+package com.peerloomllc.satscream
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel

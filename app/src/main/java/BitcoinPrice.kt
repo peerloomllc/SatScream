@@ -1,4 +1,4 @@
-package com.example.satscream
+package com.peerloomllc.satscream
 
 data class BitcoinResponse(
     val bpi: Bpi
