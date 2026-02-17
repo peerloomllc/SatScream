@@ -2,7 +2,7 @@ Stay humble and stack sats with simple, fun Bitcoin price alerts.
 
 🚀 FEATURES:
 - Set custom pump and dump price alerts
-- Choose between Fiat ($) and Bitcoin Standard (sats/$) modes
+- Choose between Fiat and Bitcoin Standard modes
 - Personalize alert sounds with your own audio files
 - Home screen widget shows current BTC price
 - Dark mode support
