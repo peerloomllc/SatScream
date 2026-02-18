@@ -25,6 +25,21 @@ class AboutActivity : AppCompatActivity() {
             finish()
         }
 
+        // Set version info dynamically
+        val tvVersionInfo = findViewById<TextView>(R.id.tvVersionInfo)
+        try {
+            val versionName = packageManager.getPackageInfo(packageName, 0).versionName
+            val versionCode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                packageManager.getPackageInfo(packageName, 0).longVersionCode
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageInfo(packageName, 0).versionCode.toLong()
+            }
+            tvVersionInfo.text = "Version $versionName ($versionCode)"
+        } catch (e: Exception) {
+            tvVersionInfo.text = "Version 1.0.0"
+        }
+
         tvNoWalletMessage = findViewById(R.id.tvNoWalletMessage)
         tvLightningAddress = findViewById(R.id.tvLightningAddress)
         btnLearnMoreWallets = findViewById(R.id.btnLearnMoreWallets)

@@ -13,8 +13,8 @@ android {
         applicationId = "com.peerloomllc.satscream"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.2"
+        versionCode = 2
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -61,7 +61,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("com.google.android.material:material:1.12.0")
-
+    implementation("androidx.core:core-ktx:1.12.0")
     // For HTTP requests
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     // For JSON parsing

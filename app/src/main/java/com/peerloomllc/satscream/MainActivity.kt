@@ -15,6 +15,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +26,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity() {
 
@@ -65,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         return String.format(Locale.US, "$%,d", wholePrice)
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -160,7 +163,7 @@ class MainActivity : AppCompatActivity() {
                 view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
 
                 // Save preference
-                sharedPrefs.edit().putBoolean(PREF_DARK_MODE, isChecked).apply()
+                sharedPrefs.edit { putBoolean(PREF_DARK_MODE, isChecked) }
 
                 // Update widget with new theme
                 BitcoinWidget.updateAllWidgets(this)
@@ -207,7 +210,10 @@ class MainActivity : AppCompatActivity() {
 
         // Save preference
         val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
-        sharedPrefs.edit().putBoolean(PREF_BITCOIN_STANDARD_MODE, isBitcoinStandardMode).apply()
+        sharedPrefs.edit {
+            putBoolean(PREF_BITCOIN_STANDARD_MODE, isBitcoinStandardMode)
+        }
+
 
         // Update widget with new mode
         BitcoinWidget.updateAllWidgets(this)
@@ -238,6 +244,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("SetTextI18n")
     private fun setupAlertUI() {
         val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
@@ -271,7 +278,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
+    @RequiresApi(Build.VERSION_CODES.R)
+    @SuppressLint("SetTextI18n", "InflateParams")
     private fun showPriceInputBottomSheet(isPump: Boolean) {
         val bottomSheetDialog = BottomSheetDialog(this)
         val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_price_input, null)
@@ -374,11 +382,11 @@ class MainActivity : AppCompatActivity() {
                 val targetPrice = currentInput.toFloatOrNull()
                 if (targetPrice != null && targetPrice > 0f) {
                     if (isPump) {
-                        sharedPrefs.edit()
-                            .putFloat("TARGET_PRICE_PUMP", targetPrice)
-                            .putBoolean("PUMP_ALERT_TRIGGERED", false)
-                            .putBoolean("PUMP_ALERT_IS_BITCOIN_MODE", isBitcoinStandardMode)
-                            .apply()
+                        sharedPrefs.edit {
+                            putFloat("TARGET_PRICE_PUMP", targetPrice)
+                                .putBoolean("PUMP_ALERT_TRIGGERED", false)
+                                .putBoolean("PUMP_ALERT_IS_BITCOIN_MODE", isBitcoinStandardMode)
+                        }
 
                         // Update display immediately
                         if (isBitcoinStandardMode) {
@@ -388,11 +396,11 @@ class MainActivity : AppCompatActivity() {
                         }
                         Toast.makeText(this, "Pump Alert Set!", Toast.LENGTH_SHORT).show()
                     } else {
-                        sharedPrefs.edit()
-                            .putFloat("TARGET_PRICE_DUMP", targetPrice)
-                            .putBoolean("DUMP_ALERT_TRIGGERED", false)
-                            .putBoolean("DUMP_ALERT_IS_BITCOIN_MODE", isBitcoinStandardMode)
-                            .apply()
+                        sharedPrefs.edit {
+                            putFloat("TARGET_PRICE_DUMP", targetPrice)
+                                .putBoolean("DUMP_ALERT_TRIGGERED", false)
+                                .putBoolean("DUMP_ALERT_IS_BITCOIN_MODE", isBitcoinStandardMode)
+                        }
 
                         // Update display immediately
                         if (isBitcoinStandardMode) {
@@ -409,17 +417,17 @@ class MainActivity : AppCompatActivity() {
             } else {
                 // Empty input means clear the alert
                 if (isPump) {
-                    sharedPrefs.edit()
-                        .remove("TARGET_PRICE_PUMP")
-                        .remove("PUMP_ALERT_TRIGGERED")
-                        .apply()
+                    sharedPrefs.edit {
+                        remove("TARGET_PRICE_PUMP")
+                            .remove("PUMP_ALERT_TRIGGERED")
+                    }
                     tvPumpAlertStatus.text = "No pump alert set"
                     Toast.makeText(this, "Pump alert cleared", Toast.LENGTH_SHORT).show()
                 } else {
-                    sharedPrefs.edit()
-                        .remove("TARGET_PRICE_DUMP")
-                        .remove("DUMP_ALERT_TRIGGERED")
-                        .apply()
+                    sharedPrefs.edit {
+                        remove("TARGET_PRICE_DUMP")
+                            .remove("DUMP_ALERT_TRIGGERED")
+                    }
                     tvDumpAlertStatus.text = "No dump alert set"
                     Toast.makeText(this, "Dump alert cleared", Toast.LENGTH_SHORT).show()
                 }

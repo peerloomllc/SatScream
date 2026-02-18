@@ -1,6 +1,5 @@
 package com.peerloomllc.satscream
 
-import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -10,6 +9,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import java.util.Locale
+import androidx.core.content.edit
 
 class AudioSettingsActivity : AppCompatActivity() {
 
@@ -19,12 +20,18 @@ class AudioSettingsActivity : AppCompatActivity() {
     private var selectingPump = true  // Track which audio we're selecting
     private var mediaPlayer: MediaPlayer? = null  // For playing test audio
 
-    // File picker launcher
+    // File picker launcher - using OpenDocument for better MIME type filtering
     private val filePickerLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
-            handleAudioSelection(it, selectingPump)
+            // Validate it's an audio file
+            val mimeType = contentResolver.getType(it)
+            if (mimeType?.startsWith("audio/") == true) {
+                handleAudioSelection(it, selectingPump)
+            } else {
+                Toast.makeText(this, "Please select an audio file (.mp3, .wav, .m4a, etc.)", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -90,8 +97,17 @@ class AudioSettingsActivity : AppCompatActivity() {
     }
 
     private fun openFilePicker() {
-        // Launch file picker for audio files
-        filePickerLauncher.launch("audio/*")
+        // OpenDocument requires an array of MIME types
+        // This provides better filtering than GetContent
+        filePickerLauncher.launch(arrayOf(
+            "audio/*",
+            "audio/mpeg",      // .mp3
+            "audio/wav",       // .wav
+            "audio/x-wav",     // .wav (alternative)
+            "audio/mp4",       // .m4a
+            "audio/ogg",       // .ogg
+            "audio/flac"       // .flac
+        ))
     }
 
     private fun handleAudioSelection(uri: Uri, isPump: Boolean) {
@@ -109,7 +125,7 @@ class AudioSettingsActivity : AppCompatActivity() {
                 val fileSizeMB = fileSize / (1024.0 * 1024.0)
                 Toast.makeText(
                     this,
-                    "Audio file too large (${String.format("%.1f", fileSizeMB)} MB). Maximum size is 10 MB.",
+                    "Audio file too large (${String.format(Locale.US, "%.1f", fileSizeMB)} MB). Maximum size is 10 MB.",
                     Toast.LENGTH_LONG
                 ).show()
                 return
@@ -144,10 +160,10 @@ class AudioSettingsActivity : AppCompatActivity() {
             val pathKey = if (isPump) "CUSTOM_PUMP_AUDIO_PATH" else "CUSTOM_DUMP_AUDIO_PATH"
             val nameKey = if (isPump) "CUSTOM_PUMP_AUDIO_NAME" else "CUSTOM_DUMP_AUDIO_NAME"
 
-            sharedPrefs.edit()
-                .putString(pathKey, outputFile.absolutePath)
-                .putString(nameKey, originalFileName)
-                .apply()
+            sharedPrefs.edit {
+                putString(pathKey, outputFile.absolutePath)
+                putString(nameKey, originalFileName)
+            }
 
             Toast.makeText(
                 this,
@@ -216,10 +232,10 @@ class AudioSettingsActivity : AppCompatActivity() {
         }
 
         // Remove both path and name preferences
-        sharedPrefs.edit()
-            .remove(pathKey)
-            .remove(nameKey)
-            .apply()
+        sharedPrefs.edit {
+            remove(pathKey)
+            remove(nameKey)
+        }
 
         Toast.makeText(
             this,
@@ -306,11 +322,6 @@ class AudioSettingsActivity : AppCompatActivity() {
             android.util.Log.d("AudioSettings", "Using default dump audio")
             getString(R.string.using_default_audio)
         }
-    }
-
-    override fun finish() {
-        super.finish()
-        // Simple finish without custom transitions to avoid conflicts
     }
 
     override fun onDestroy() {
