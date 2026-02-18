@@ -1,5 +1,6 @@
 package com.peerloomllc.satscream
 
+import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -97,6 +98,35 @@ class AudioSettingsActivity : AppCompatActivity() {
         val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
 
         try {
+            // Get file size
+            val fileSize = contentResolver.openInputStream(uri)?.use { inputStream ->
+                inputStream.available().toLong()
+            } ?: 0L
+
+            // Check file size limit (10MB = 10 * 1024 * 1024 bytes)
+            val maxFileSize = 10 * 1024 * 1024L
+            if (fileSize > maxFileSize) {
+                val fileSizeMB = fileSize / (1024.0 * 1024.0)
+                Toast.makeText(
+                    this,
+                    "Audio file too large (${String.format("%.1f", fileSizeMB)} MB). Maximum size is 10 MB.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return
+            }
+
+            // Check duration (optional - 30 seconds max)
+            val duration = getAudioDuration(uri)
+            if (duration > 5000) { // 5 seconds in milliseconds
+                val durationSeconds = duration / 1000
+                Toast.makeText(
+                    this,
+                    "Audio file too long ($durationSeconds seconds). Maximum length is 5 seconds.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return
+            }
+
             // Get the original filename from the URI
             val originalFileName = getFileNameFromUri(uri) ?: "audio_file.wav"
 
@@ -134,6 +164,19 @@ class AudioSettingsActivity : AppCompatActivity() {
                 "Error selecting audio file: ${e.message}",
                 Toast.LENGTH_LONG
             ).show()
+        }
+    }
+
+    private fun getAudioDuration(uri: Uri): Long {
+        return try {
+            val retriever = android.media.MediaMetadataRetriever()
+            retriever.setDataSource(this, uri)
+            val duration = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
+            retriever.release()
+            duration?.toLongOrNull() ?: 0L
+        } catch (e: Exception) {
+            android.util.Log.e("AudioSettings", "Error getting audio duration", e)
+            0L // If we can't get duration, allow it (fail open)
         }
     }
 
@@ -207,7 +250,7 @@ class AudioSettingsActivity : AppCompatActivity() {
                     mediaPlayer?.setDataSource(customAudioPath)
                     mediaPlayer?.prepare()
                     mediaPlayer?.start()
-
+                    android.util.Log.d("AudioSettings", "Playing custom test audio: $customAudioPath")
                     return
                 }
             }
@@ -221,7 +264,7 @@ class AudioSettingsActivity : AppCompatActivity() {
 
             mediaPlayer?.prepare()
             mediaPlayer?.start()
-
+            android.util.Log.d("AudioSettings", "Playing default test audio: $assetFileName")
 
         } catch (e: Exception) {
             android.util.Log.e("AudioSettings", "Error playing test audio", e)
@@ -238,14 +281,14 @@ class AudioSettingsActivity : AppCompatActivity() {
         val pumpPath = sharedPrefs.getString("CUSTOM_PUMP_AUDIO_PATH", null)
         val pumpName = sharedPrefs.getString("CUSTOM_PUMP_AUDIO_NAME", null)
 
-
+        android.util.Log.d("AudioSettings", "Pump - Path: $pumpPath, Name: $pumpName")
 
         tvPumpAudioStatus.text = if (pumpPath != null && java.io.File(pumpPath).exists() && pumpName != null) {
             val statusText = "Using custom audio \"$pumpName\""
-
+            android.util.Log.d("AudioSettings", "Setting pump status to: $statusText")
             statusText
         } else {
-
+            android.util.Log.d("AudioSettings", "Using default pump audio")
             getString(R.string.using_default_audio)
         }
 
@@ -253,14 +296,14 @@ class AudioSettingsActivity : AppCompatActivity() {
         val dumpPath = sharedPrefs.getString("CUSTOM_DUMP_AUDIO_PATH", null)
         val dumpName = sharedPrefs.getString("CUSTOM_DUMP_AUDIO_NAME", null)
 
-
+        android.util.Log.d("AudioSettings", "Dump - Path: $dumpPath, Name: $dumpName")
 
         tvDumpAudioStatus.text = if (dumpPath != null && java.io.File(dumpPath).exists() && dumpName != null) {
             val statusText = "Using custom audio \"$dumpName\""
-
+            android.util.Log.d("AudioSettings", "Setting dump status to: $statusText")
             statusText
         } else {
-
+            android.util.Log.d("AudioSettings", "Using default dump audio")
             getString(R.string.using_default_audio)
         }
     }
