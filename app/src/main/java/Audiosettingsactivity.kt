@@ -9,6 +9,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 import androidx.core.content.edit
 
@@ -111,75 +115,85 @@ class AudioSettingsActivity : AppCompatActivity() {
     }
 
     private fun handleAudioSelection(uri: Uri, isPump: Boolean) {
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+        // All of the work below (file-size read, MediaMetadataRetriever, copying up to a
+        // 10 MB file) is blocking I/O. Run it off the main thread to avoid ANRs and marshal
+        // user-facing feedback back to main.
+        lifecycleScope.launch {
+            val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
 
-        try {
-            // Get file size
-            val fileSize = contentResolver.openInputStream(uri)?.use { inputStream ->
-                inputStream.available().toLong()
-            } ?: 0L
-
-            // Check file size limit (10MB = 10 * 1024 * 1024 bytes)
-            val maxFileSize = 10 * 1024 * 1024L
-            if (fileSize > maxFileSize) {
-                val fileSizeMB = fileSize / (1024.0 * 1024.0)
-                Toast.makeText(
-                    this,
-                    "Audio file too large (${String.format(Locale.US, "%.1f", fileSizeMB)} MB). Maximum size is 10 MB.",
-                    Toast.LENGTH_LONG
-                ).show()
-                return
-            }
-
-            // Check duration (optional - 30 seconds max)
-            val duration = getAudioDuration(uri)
-            if (duration > 5000) { // 5 seconds in milliseconds
-                val durationSeconds = duration / 1000
-                Toast.makeText(
-                    this,
-                    "Audio file too long ($durationSeconds seconds). Maximum length is 5 seconds.",
-                    Toast.LENGTH_LONG
-                ).show()
-                return
-            }
-
-            // Get the original filename from the URI
-            val originalFileName = getFileNameFromUri(uri) ?: "audio_file.wav"
-
-            // Copy the audio file to internal storage
-            val fileName = if (isPump) "custom_pump_audio.wav" else "custom_dump_audio.wav"
-            val outputFile = java.io.File(filesDir, fileName)
-
-            contentResolver.openInputStream(uri)?.use { inputStream ->
-                outputFile.outputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
+            try {
+                // Get file size
+                val fileSize = withContext(Dispatchers.IO) {
+                    contentResolver.openInputStream(uri)?.use { inputStream ->
+                        inputStream.available().toLong()
+                    } ?: 0L
                 }
+
+                // Check file size limit (10MB = 10 * 1024 * 1024 bytes)
+                val maxFileSize = 10 * 1024 * 1024L
+                if (fileSize > maxFileSize) {
+                    val fileSizeMB = fileSize / (1024.0 * 1024.0)
+                    Toast.makeText(
+                        this@AudioSettingsActivity,
+                        "Audio file too large (${String.format(Locale.US, "%.1f", fileSizeMB)} MB). Maximum size is 10 MB.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
+                // Check duration (optional - 30 seconds max)
+                val duration = withContext(Dispatchers.IO) { getAudioDuration(uri) }
+                if (duration > 5000) { // 5 seconds in milliseconds
+                    val durationSeconds = duration / 1000
+                    Toast.makeText(
+                        this@AudioSettingsActivity,
+                        "Audio file too long ($durationSeconds seconds). Maximum length is 5 seconds.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
+                // Get the original filename from the URI
+                val originalFileName = withContext(Dispatchers.IO) { getFileNameFromUri(uri) }
+                    ?: "audio_file.wav"
+
+                // Copy the audio file to internal storage
+                val fileName = if (isPump) "custom_pump_audio.wav" else "custom_dump_audio.wav"
+                val outputFile = java.io.File(filesDir, fileName)
+
+                withContext(Dispatchers.IO) {
+                    contentResolver.openInputStream(uri)?.use { inputStream ->
+                        outputFile.outputStream().use { outputStream ->
+                            inputStream.copyTo(outputStream)
+                        }
+                    }
+                }
+
+                // Save the internal file path AND original filename
+                val pathKey = if (isPump) "CUSTOM_PUMP_AUDIO_PATH" else "CUSTOM_DUMP_AUDIO_PATH"
+                val nameKey = if (isPump) "CUSTOM_PUMP_AUDIO_NAME" else "CUSTOM_DUMP_AUDIO_NAME"
+
+                sharedPrefs.edit {
+                    putString(pathKey, outputFile.absolutePath)
+                    putString(nameKey, originalFileName)
+                }
+
+                Toast.makeText(
+                    this@AudioSettingsActivity,
+                    if (isPump) "Pump alert audio updated" else "Dump alert audio updated",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                updateAudioStatus()
+
+            } catch (e: Exception) {
+                android.util.Log.e("AudioSettings", "Error saving audio", e)
+                Toast.makeText(
+                    this@AudioSettingsActivity,
+                    "Error selecting audio file: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
-
-            // Save the internal file path AND original filename
-            val pathKey = if (isPump) "CUSTOM_PUMP_AUDIO_PATH" else "CUSTOM_DUMP_AUDIO_PATH"
-            val nameKey = if (isPump) "CUSTOM_PUMP_AUDIO_NAME" else "CUSTOM_DUMP_AUDIO_NAME"
-
-            sharedPrefs.edit {
-                putString(pathKey, outputFile.absolutePath)
-                putString(nameKey, originalFileName)
-            }
-
-            Toast.makeText(
-                this,
-                if (isPump) "Pump alert audio updated" else "Dump alert audio updated",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            updateAudioStatus()
-
-        } catch (e: Exception) {
-            android.util.Log.e("AudioSettings", "Error saving audio", e)
-            Toast.makeText(
-                this,
-                "Error selecting audio file: ${e.message}",
-                Toast.LENGTH_LONG
-            ).show()
         }
     }
 
@@ -256,7 +270,20 @@ class AudioSettingsActivity : AppCompatActivity() {
             val customAudioKey = if (isPump) "CUSTOM_PUMP_AUDIO_PATH" else "CUSTOM_DUMP_AUDIO_PATH"
             val customAudioPath = sharedPrefs.getString(customAudioKey, null)
 
-            mediaPlayer = MediaPlayer()
+            // prepareAsync() keeps decoding off the main thread (synchronous prepare() can
+            // block for seconds and ANR). Start playback once prepared; release on completion.
+            mediaPlayer = MediaPlayer().apply {
+                setOnPreparedListener { it.start() }
+                setOnCompletionListener {
+                    it.release()
+                    mediaPlayer = null
+                }
+                setOnErrorListener { mp, _, _ ->
+                    mp.release()
+                    mediaPlayer = null
+                    true
+                }
+            }
 
             // Check if custom audio exists
             if (customAudioPath != null && customAudioPath.isNotEmpty()) {
@@ -264,8 +291,7 @@ class AudioSettingsActivity : AppCompatActivity() {
                 if (customFile.exists() && customFile.canRead() && customFile.length() > 0) {
                     // Play custom audio
                     mediaPlayer?.setDataSource(customAudioPath)
-                    mediaPlayer?.prepare()
-                    mediaPlayer?.start()
+                    mediaPlayer?.prepareAsync()
                     android.util.Log.d("AudioSettings", "Playing custom test audio: $customAudioPath")
                     return
                 }
@@ -278,8 +304,7 @@ class AudioSettingsActivity : AppCompatActivity() {
             mediaPlayer?.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
             afd.close()
 
-            mediaPlayer?.prepare()
-            mediaPlayer?.start()
+            mediaPlayer?.prepareAsync()
             android.util.Log.d("AudioSettings", "Playing default test audio: $assetFileName")
 
         } catch (e: Exception) {
