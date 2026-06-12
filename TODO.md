@@ -14,7 +14,7 @@ Each item: `- [ ] Description` with metadata tags: `[type]` `[complexity]` `[pri
 
 - [x] Move custom-audio import off the main thread — `AudioSettingsActivity.handleAudioSelection()` now runs the file-size read, `getAudioDuration()`, and the file copy inside `withContext(Dispatchers.IO)` via `lifecycleScope.launch`, marshalling Toast/UI back to main. Verified on Pixel 9. `[bug]` `[medium]` `[high]`
 - [x] Replace synchronous `MediaPlayer.prepare()` on the main thread in `playTestAudio()` with `prepareAsync()` + `setOnPreparedListener { start() }` (plus completion/error listeners that release the player). (The same call in `BitcoinService` is fine — it's on `Dispatchers.IO`.) Verified on Pixel 9. `[bug]` `[small]` `[high]`
-- [ ] Replace the 1-second main-thread polling loop in `MainActivity.startPriceMonitoring()` (`:470`) — re-reads SharedPreferences and rewrites every view once per second though the price changes only every 60s. Switch to event-driven updates (`OnSharedPreferenceChangeListener` or a callback/LocalBroadcast from `BitcoinService`). Reduces chronic jank and battery drain `[refactor]` `[medium]` `[medium]`
+- [x] Replace the 1-second main-thread polling loop in `MainActivity` with an event-driven `SharedPreferences.OnSharedPreferenceChangeListener` (registered in `onResume`, unregistered in `onPause`; UI work marshalled to main via `runOnUiThread` since the service writes from a background thread). Removes per-second main-thread work; reduces jank and battery drain. Verified on Pixel 9. `[refactor]` `[medium]` `[medium]`
 
 ### Build & Dependencies
 

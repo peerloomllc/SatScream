@@ -5,6 +5,7 @@ import com.peerloomllc.satscream.R
 import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -18,12 +19,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.switchmaterial.SwitchMaterial
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import androidx.core.content.edit
@@ -54,6 +51,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAudioSettings: ImageButton
 
     private val dateFormat = SimpleDateFormat("hh:mm:ss a", Locale.US)
+
+    // Event-driven UI refresh: BitcoinService writes the latest price/alert state to
+    // SharedPreferences, so we update only when a relevant key actually changes instead of
+    // polling once per second. The service writes via apply() on a background thread, so the
+    // callback can fire off the main thread — marshal UI work back with runOnUiThread.
+    private val prefsListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            when (key) {
+                PREF_LAST_PRICE, PREF_LAST_UPDATE_TIME,
+                "PUMP_ALERT_TRIGGERED", "DUMP_ALERT_TRIGGERED" ->
+                    runOnUiThread { loadPriceFromPrefs() }
+            }
+        }
 
     companion object {
         private const val PREF_DARK_MODE = "DARK_MODE"
@@ -143,9 +153,7 @@ class MainActivity : AppCompatActivity() {
 
         // Load initial price from SharedPreferences (set by BitcoinService)
         loadPriceFromPrefs()
-
-        // Start monitoring for price updates from service
-        startPriceMonitoring()
+        // Live updates are driven by the SharedPreferences listener registered in onResume().
     }
 
     private fun setupDarkModeToggle(isDarkMode: Boolean) {
@@ -467,14 +475,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startPriceMonitoring() {
-        lifecycleScope.launch {
-            while (isActive) {
-                // Just read the price that BitcoinService already fetched
-                loadPriceFromPrefs()
-                delay(1000) // Check every 1 second for faster UI updates
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        // Refresh once to catch any update that landed while paused, then listen for changes.
+        loadPriceFromPrefs()
+        getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+            .registerOnSharedPreferenceChangeListener(prefsListener)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+            .unregisterOnSharedPreferenceChangeListener(prefsListener)
     }
 
     @SuppressLint("SetTextI18n")
