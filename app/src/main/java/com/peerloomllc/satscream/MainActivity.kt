@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ivDumpIcon: ImageView
 
     private var isBitcoinStandardMode = false
-    private val PREF_BITCOIN_STANDARD_MODE = "BITCOIN_STANDARD_MODE"
     private var currentPrice: Double? = null
 
     // Info button
@@ -59,25 +58,19 @@ class MainActivity : AppCompatActivity() {
     private val prefsListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
-                PREF_LAST_PRICE, PREF_LAST_UPDATE_TIME,
-                "PUMP_ALERT_TRIGGERED", "DUMP_ALERT_TRIGGERED" ->
+                Prefs.LAST_PRICE, Prefs.LAST_UPDATE_TIME,
+                Prefs.PUMP_TRIGGERED, Prefs.DUMP_TRIGGERED ->
                     runOnUiThread { loadPriceFromPrefs() }
             }
         }
-
-    companion object {
-        private const val PREF_DARK_MODE = "DARK_MODE"
-        private const val PREF_LAST_PRICE = "LAST_PRICE"
-        private const val PREF_LAST_UPDATE_TIME = "LAST_UPDATE_TIME"
-    }
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Check if this is first launch
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
-        val welcomeShown = sharedPrefs.getBoolean("WELCOME_SHOWN", false)
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+        val welcomeShown = sharedPrefs.getBoolean(Prefs.WELCOME_SHOWN, false)
 
         if (!welcomeShown) {
             // First launch - show welcome screen
@@ -88,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Load and apply dark mode preference BEFORE setContentView
-        val isDarkMode = sharedPrefs.getBoolean(PREF_DARK_MODE, false)
+        val isDarkMode = sharedPrefs.getBoolean(Prefs.DARK_MODE, false)
 
         AppCompatDelegate.setDefaultNightMode(
             if (isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
@@ -122,7 +115,7 @@ class MainActivity : AppCompatActivity() {
         btnAudioSettings = findViewById(R.id.btnAudioSettings)
 
         // Load Bitcoin Standard mode preference
-        isBitcoinStandardMode = sharedPrefs.getBoolean(PREF_BITCOIN_STANDARD_MODE, false)
+        isBitcoinStandardMode = sharedPrefs.getBoolean(Prefs.BITCOIN_STANDARD_MODE, false)
 
         // Setup Bitcoin Standard mode toggle on tvPrice click
         tvPrice.setOnClickListener {
@@ -151,7 +144,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupDarkModeToggle(isDarkMode: Boolean) {
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
 
         // Set initial state WITHOUT triggering listener
         switchDarkMode.setOnCheckedChangeListener(null)
@@ -165,7 +158,7 @@ class MainActivity : AppCompatActivity() {
                 view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
 
                 // Save preference
-                sharedPrefs.edit { putBoolean(PREF_DARK_MODE, isChecked) }
+                sharedPrefs.edit { putBoolean(Prefs.DARK_MODE, isChecked) }
 
                 // Update widget with new theme
                 BitcoinWidget.updateAllWidgets(this)
@@ -211,9 +204,9 @@ class MainActivity : AppCompatActivity() {
         isBitcoinStandardMode = !isBitcoinStandardMode
 
         // Save preference
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
         sharedPrefs.edit {
-            putBoolean(PREF_BITCOIN_STANDARD_MODE, isBitcoinStandardMode)
+            putBoolean(Prefs.BITCOIN_STANDARD_MODE, isBitcoinStandardMode)
         }
 
 
@@ -249,10 +242,10 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("SetTextI18n")
     private fun setupAlertUI() {
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
 
         // Load saved pump alert STATUS only
-        val savedPumpPrice = sharedPrefs.getFloat("TARGET_PRICE_PUMP", 0f)
+        val savedPumpPrice = sharedPrefs.getFloat(Prefs.PUMP_TARGET, 0f)
         if (savedPumpPrice > 0f) {
             tvPumpAlertStatus.text = "Pump alert: ${BtcPrice.formatUsd(savedPumpPrice.toDouble())}"
         } else {
@@ -260,7 +253,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Load saved dump alert STATUS only
-        val savedDumpPrice = sharedPrefs.getFloat("TARGET_PRICE_DUMP", 0f)
+        val savedDumpPrice = sharedPrefs.getFloat(Prefs.DUMP_TARGET, 0f)
         if (savedDumpPrice > 0f) {
             tvDumpAlertStatus.text = "Dump alert: ${BtcPrice.formatUsd(savedDumpPrice.toDouble())}"
         } else {
@@ -378,16 +371,16 @@ class MainActivity : AppCompatActivity() {
         btnCreateAlert.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
 
-            val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+            val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
 
             if (currentInput.isNotEmpty()) {
                 val targetPrice = currentInput.toFloatOrNull()
                 if (targetPrice != null && targetPrice > 0f) {
                     if (isPump) {
                         sharedPrefs.edit {
-                            putFloat("TARGET_PRICE_PUMP", targetPrice)
-                                .putBoolean("PUMP_ALERT_TRIGGERED", false)
-                                .putBoolean("PUMP_ALERT_IS_BITCOIN_MODE", isBitcoinStandardMode)
+                            putFloat(Prefs.PUMP_TARGET, targetPrice)
+                                .putBoolean(Prefs.PUMP_TRIGGERED, false)
+                                .putBoolean(Prefs.PUMP_IS_BITCOIN_MODE, isBitcoinStandardMode)
                         }
 
                         // Update display immediately
@@ -399,9 +392,9 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this, "Pump Alert Set!", Toast.LENGTH_SHORT).show()
                     } else {
                         sharedPrefs.edit {
-                            putFloat("TARGET_PRICE_DUMP", targetPrice)
-                                .putBoolean("DUMP_ALERT_TRIGGERED", false)
-                                .putBoolean("DUMP_ALERT_IS_BITCOIN_MODE", isBitcoinStandardMode)
+                            putFloat(Prefs.DUMP_TARGET, targetPrice)
+                                .putBoolean(Prefs.DUMP_TRIGGERED, false)
+                                .putBoolean(Prefs.DUMP_IS_BITCOIN_MODE, isBitcoinStandardMode)
                         }
 
                         // Update display immediately
@@ -420,15 +413,15 @@ class MainActivity : AppCompatActivity() {
                 // Empty input means clear the alert
                 if (isPump) {
                     sharedPrefs.edit {
-                        remove("TARGET_PRICE_PUMP")
-                            .remove("PUMP_ALERT_TRIGGERED")
+                        remove(Prefs.PUMP_TARGET)
+                            .remove(Prefs.PUMP_TRIGGERED)
                     }
                     tvPumpAlertStatus.text = "No pump alert set"
                     Toast.makeText(this, "Pump alert cleared", Toast.LENGTH_SHORT).show()
                 } else {
                     sharedPrefs.edit {
-                        remove("TARGET_PRICE_DUMP")
-                            .remove("DUMP_ALERT_TRIGGERED")
+                        remove(Prefs.DUMP_TARGET)
+                            .remove(Prefs.DUMP_TRIGGERED)
                     }
                     tvDumpAlertStatus.text = "No dump alert set"
                     Toast.makeText(this, "Dump alert cleared", Toast.LENGTH_SHORT).show()
@@ -441,9 +434,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadPriceFromPrefs() {
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
-        val lastPrice = sharedPrefs.getFloat(PREF_LAST_PRICE, 0f)
-        val lastUpdateTime = sharedPrefs.getString(PREF_LAST_UPDATE_TIME, null)
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+        val lastPrice = sharedPrefs.getFloat(Prefs.LAST_PRICE, 0f)
+        val lastUpdateTime = sharedPrefs.getString(Prefs.LAST_UPDATE_TIME, null)
 
         if (lastPrice > 0f) {
             currentPrice = lastPrice.toDouble()
@@ -472,27 +465,27 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         // Refresh once to catch any update that landed while paused, then listen for changes.
         loadPriceFromPrefs()
-        getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+        getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
             .registerOnSharedPreferenceChangeListener(prefsListener)
     }
 
     override fun onPause() {
         super.onPause()
-        getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+        getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
             .unregisterOnSharedPreferenceChangeListener(prefsListener)
     }
 
     @SuppressLint("SetTextI18n")
     private fun updateAlertStatusDisplays() {
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
-        val lastPrice = sharedPrefs.getFloat(PREF_LAST_PRICE, 0f)
-        val isDarkMode = sharedPrefs.getBoolean(PREF_DARK_MODE, false)
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+        val lastPrice = sharedPrefs.getFloat(Prefs.LAST_PRICE, 0f)
+        val isDarkMode = sharedPrefs.getBoolean(Prefs.DARK_MODE, false)
 
         renderAlertStatus(
             label = "Pump",
-            target = sharedPrefs.getFloat("TARGET_PRICE_PUMP", 0f),
-            triggered = sharedPrefs.getBoolean("PUMP_ALERT_TRIGGERED", false),
-            wasSetInBitcoinMode = sharedPrefs.getBoolean("PUMP_ALERT_IS_BITCOIN_MODE", false),
+            target = sharedPrefs.getFloat(Prefs.PUMP_TARGET, 0f),
+            triggered = sharedPrefs.getBoolean(Prefs.PUMP_TRIGGERED, false),
+            wasSetInBitcoinMode = sharedPrefs.getBoolean(Prefs.PUMP_IS_BITCOIN_MODE, false),
             lastPrice = lastPrice,
             statusView = tvPumpAlertStatus,
             iconView = ivPumpIcon,
@@ -500,9 +493,9 @@ class MainActivity : AppCompatActivity() {
         )
         renderAlertStatus(
             label = "Dump",
-            target = sharedPrefs.getFloat("TARGET_PRICE_DUMP", 0f),
-            triggered = sharedPrefs.getBoolean("DUMP_ALERT_TRIGGERED", false),
-            wasSetInBitcoinMode = sharedPrefs.getBoolean("DUMP_ALERT_IS_BITCOIN_MODE", false),
+            target = sharedPrefs.getFloat(Prefs.DUMP_TARGET, 0f),
+            triggered = sharedPrefs.getBoolean(Prefs.DUMP_TRIGGERED, false),
+            wasSetInBitcoinMode = sharedPrefs.getBoolean(Prefs.DUMP_IS_BITCOIN_MODE, false),
             lastPrice = lastPrice,
             statusView = tvDumpAlertStatus,
             iconView = ivDumpIcon,

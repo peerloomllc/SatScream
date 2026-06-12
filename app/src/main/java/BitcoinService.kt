@@ -78,15 +78,6 @@ class BitcoinService : Service() {
         private const val ALERT_NOTIFICATION_ID = 2
         private const val API_URL_PRIMARY = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
         private const val API_URL_SECONDARY = "https://api.coinbase.com/v2/prices/BTC-USD/spot"
-
-        // Shared Preference Keys
-        const val PREFS_NAME = "BitcoinPrefs"
-        const val KEY_PUMP_TARGET = "TARGET_PRICE_PUMP"
-        const val KEY_DUMP_TARGET = "TARGET_PRICE_DUMP"
-        const val KEY_PUMP_TRIGGERED = "PUMP_ALERT_TRIGGERED"
-        const val KEY_DUMP_TRIGGERED = "DUMP_ALERT_TRIGGERED"
-        const val KEY_LAST_PRICE = "LAST_PRICE"
-        const val KEY_LAST_UPDATE_TIME = "LAST_UPDATE_TIME"
     }
 
     override fun onCreate() {
@@ -103,15 +94,15 @@ class BitcoinService : Service() {
                     val price = fetchBitcoinPrice()
 
                     // Access setup preferences
-                    val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    val prefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
 
                     // 1. Get Targets
-                    val pumpTarget = prefs.getFloat(KEY_PUMP_TARGET, 0f)
-                    val dumpTarget = prefs.getFloat(KEY_DUMP_TARGET, 0f)
+                    val pumpTarget = prefs.getFloat(Prefs.PUMP_TARGET, 0f)
+                    val dumpTarget = prefs.getFloat(Prefs.DUMP_TARGET, 0f)
 
                     // 2. Get Trigger States
-                    val pumpTriggered = prefs.getBoolean(KEY_PUMP_TRIGGERED, false)
-                    val dumpTriggered = prefs.getBoolean(KEY_DUMP_TRIGGERED, false)
+                    val pumpTriggered = prefs.getBoolean(Prefs.PUMP_TRIGGERED, false)
+                    val dumpTriggered = prefs.getBoolean(Prefs.DUMP_TRIGGERED, false)
 
                     if (price != null) {
                         // Success - store and update
@@ -120,8 +111,8 @@ class BitcoinService : Service() {
                         // Save price and timestamp to SharedPreferences for MainActivity
                         val currentTime = "Last updated: ${dateFormat.format(Date())}"
                         prefs.edit()
-                            .putFloat(KEY_LAST_PRICE, price.toFloat())
-                            .putString(KEY_LAST_UPDATE_TIME, currentTime)
+                            .putFloat(Prefs.LAST_PRICE, price.toFloat())
+                            .putString(Prefs.LAST_UPDATE_TIME, currentTime)
                             .apply()
 
                         // Update widget with new price
@@ -133,7 +124,7 @@ class BitcoinService : Service() {
                         manager.notify(NOTIFICATION_ID, notification)
 
                         // Check if Bitcoin Standard Mode is enabled
-                        val isBitcoinStandardMode = prefs.getBoolean("BITCOIN_STANDARD_MODE", false)
+                        val isBitcoinStandardMode = prefs.getBoolean(Prefs.BITCOIN_STANDARD_MODE, false)
 
                         if (isBitcoinStandardMode) {
                             // ===========================
@@ -144,7 +135,7 @@ class BitcoinService : Service() {
                             // PUMP ALERT: sats per dollar LESS THAN OR EQUAL TO target (BTC price going UP)
                             if (pumpTarget > 0 && satsPerDollar <= pumpTarget && !pumpTriggered) {
                                 // Mark as triggered
-                                prefs.edit().putBoolean(KEY_PUMP_TRIGGERED, true).apply()
+                                prefs.edit().putBoolean(Prefs.PUMP_TRIGGERED, true).apply()
 
                                 // Play Pump Sound
                                 playAlertSound(isPump = true)
@@ -161,7 +152,7 @@ class BitcoinService : Service() {
                             // DUMP ALERT: sats per dollar GREATER THAN OR EQUAL TO target (BTC price going DOWN)
                             if (dumpTarget > 0 && satsPerDollar >= dumpTarget && !dumpTriggered) {
                                 // Mark as triggered
-                                prefs.edit().putBoolean(KEY_DUMP_TRIGGERED, true).apply()
+                                prefs.edit().putBoolean(Prefs.DUMP_TRIGGERED, true).apply()
 
                                 // Play Dump Sound
                                 playAlertSound(isPump = false)
@@ -177,10 +168,10 @@ class BitcoinService : Service() {
 
                             // Reset triggers when price moves away from thresholds
                             if (pumpTarget > 0 && satsPerDollar > pumpTarget * 1.01 && pumpTriggered) {
-                                prefs.edit().putBoolean(KEY_PUMP_TRIGGERED, false).apply()
+                                prefs.edit().putBoolean(Prefs.PUMP_TRIGGERED, false).apply()
                             }
                             if (dumpTarget > 0 && satsPerDollar < dumpTarget * 0.99 && dumpTriggered) {
-                                prefs.edit().putBoolean(KEY_DUMP_TRIGGERED, false).apply()
+                                prefs.edit().putBoolean(Prefs.DUMP_TRIGGERED, false).apply()
                             }
 
                         } else {
@@ -191,7 +182,7 @@ class BitcoinService : Service() {
                             // PUMP ALERT: price GREATER THAN OR EQUAL TO target
                             if (pumpTarget > 0 && price >= pumpTarget && !pumpTriggered) {
                                 // Mark as triggered
-                                prefs.edit().putBoolean(KEY_PUMP_TRIGGERED, true).apply()
+                                prefs.edit().putBoolean(Prefs.PUMP_TRIGGERED, true).apply()
 
                                 // Play Pump Sound
                                 playAlertSound(isPump = true)
@@ -207,7 +198,7 @@ class BitcoinService : Service() {
                             // DUMP ALERT: price LESS THAN OR EQUAL TO target
                             if (dumpTarget > 0 && price <= dumpTarget && !dumpTriggered) {
                                 // Mark as triggered
-                                prefs.edit().putBoolean(KEY_DUMP_TRIGGERED, true).apply()
+                                prefs.edit().putBoolean(Prefs.DUMP_TRIGGERED, true).apply()
 
                                 // Play Dump Sound
                                 playAlertSound(isPump = false)
@@ -222,10 +213,10 @@ class BitcoinService : Service() {
 
                             // Reset triggers when price moves away from thresholds
                             if (pumpTarget > 0 && price < pumpTarget * 0.99 && pumpTriggered) {
-                                prefs.edit().putBoolean(KEY_PUMP_TRIGGERED, false).apply()
+                                prefs.edit().putBoolean(Prefs.PUMP_TRIGGERED, false).apply()
                             }
                             if (dumpTarget > 0 && price > dumpTarget * 1.01 && dumpTriggered) {
-                                prefs.edit().putBoolean(KEY_DUMP_TRIGGERED, false).apply()
+                                prefs.edit().putBoolean(Prefs.DUMP_TRIGGERED, false).apply()
                             }
                         }
                     } else {
@@ -420,8 +411,8 @@ class BitcoinService : Service() {
             mediaPlayer?.release()
             mediaPlayer = null
 
-            val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
-            val customAudioKey = if (isPump) "CUSTOM_PUMP_AUDIO_PATH" else "CUSTOM_DUMP_AUDIO_PATH"
+            val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+            val customAudioKey = if (isPump) Prefs.CUSTOM_PUMP_AUDIO_PATH else Prefs.CUSTOM_DUMP_AUDIO_PATH
             val customAudioPath = sharedPrefs.getString(customAudioKey, null)
 
             var useCustomAudio = false

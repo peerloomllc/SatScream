@@ -53,10 +53,10 @@ class BitcoinWidget : AppWidgetProvider() {
             appWidgetId: Int
         ) {
             // Get shared preferences
-            val prefs = context.getSharedPreferences("BitcoinPrefs", Context.MODE_PRIVATE)
-            val price = prefs.getFloat("LAST_PRICE", 0f).toDouble()
-            val isBitcoinStandardMode = prefs.getBoolean("BITCOIN_STANDARD_MODE", false)
-            val isDarkMode = prefs.getBoolean("DARK_MODE", false)
+            val prefs = context.getSharedPreferences(Prefs.FILE, Context.MODE_PRIVATE)
+            val price = prefs.getFloat(Prefs.LAST_PRICE, 0f).toDouble()
+            val isBitcoinStandardMode = prefs.getBoolean(Prefs.BITCOIN_STANDARD_MODE, false)
+            val isDarkMode = prefs.getBoolean(Prefs.DARK_MODE, false)
 
             // Get widget dimensions for dynamic text sizing
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
