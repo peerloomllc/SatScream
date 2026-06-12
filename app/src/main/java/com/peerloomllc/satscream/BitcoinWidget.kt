@@ -13,7 +13,6 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.TypedValue
 import android.widget.RemoteViews
-import java.util.Locale
 
 class BitcoinWidget : AppWidgetProvider() {
 
@@ -74,12 +73,10 @@ class BitcoinWidget : AppWidgetProvider() {
             // Format and set price based on mode
             val priceText = if (isBitcoinStandardMode) {
                 // Bitcoin Standard Mode: Show sats per dollar
-                val satsPerDollar = (100_000_000.0 / price).toLong()
-                String.format(Locale.US, "%,d/$", satsPerDollar)
+                BtcPrice.formatSatsPerDollar(price)
             } else {
                 // Fiat Mode: Show USD price
-                val wholePrice = price.toLong()
-                String.format(Locale.US, "$%,d", wholePrice)
+                BtcPrice.formatUsd(price)
             }
 
             views.setTextViewText(R.id.tvWidgetPrice, priceText)

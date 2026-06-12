@@ -89,13 +89,6 @@ class BitcoinService : Service() {
         const val KEY_LAST_UPDATE_TIME = "LAST_UPDATE_TIME"
     }
 
-    // Helper function to format price as whole number with commas
-    // Example: 96500.50 -> "$96,500"
-    private fun formatPrice(price: Double): String {
-        val wholePrice = price.toLong()
-        return String.format(Locale.US, "$%,d", wholePrice)
-    }
-
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
@@ -135,7 +128,7 @@ class BitcoinService : Service() {
                         BitcoinWidget.updateAllWidgets(this@BitcoinService)
 
                         // Update the silent ongoing notification with current price
-                        val notification = createNotification("BTC: ${formatPrice(price)}")
+                        val notification = createNotification("BTC: ${BtcPrice.formatUsd(price)}")
                         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                         manager.notify(NOTIFICATION_ID, notification)
 
@@ -146,7 +139,7 @@ class BitcoinService : Service() {
                             // ===========================
                             // BITCOIN STANDARD MODE LOGIC
                             // ===========================
-                            val satsPerDollar = (100_000_000.0 / price)
+                            val satsPerDollar = (BtcPrice.SATS_PER_BTC / price)
 
                             // PUMP ALERT: sats per dollar LESS THAN OR EQUAL TO target (BTC price going UP)
                             if (pumpTarget > 0 && satsPerDollar <= pumpTarget && !pumpTriggered) {
@@ -205,7 +198,7 @@ class BitcoinService : Service() {
 
                                 // Show Notification
                                 val alertNotification = createAlertNotification(
-                                    "PUMPING ALERT! BTC: ${formatPrice(price)}",
+                                    "PUMPING ALERT! BTC: ${BtcPrice.formatUsd(price)}",
                                     isPump = true
                                 )
                                 manager.notify(ALERT_NOTIFICATION_ID, alertNotification)
@@ -221,7 +214,7 @@ class BitcoinService : Service() {
 
                                 // Show Notification
                                 val alertNotification = createAlertNotification(
-                                    "DUMPING ALERT! BTC: ${formatPrice(price)}",
+                                    "DUMPING ALERT! BTC: ${BtcPrice.formatUsd(price)}",
                                     isPump = false
                                 )
                                 manager.notify(ALERT_NOTIFICATION_ID, alertNotification)
@@ -238,7 +231,7 @@ class BitcoinService : Service() {
                     } else {
                         // Price fetch failed - retain previous price in notification
                         if (lastSuccessfulPrice != null) {
-                            val notification = createNotification("BTC: ${formatPrice(lastSuccessfulPrice!!)} (cached)")
+                            val notification = createNotification("BTC: ${BtcPrice.formatUsd(lastSuccessfulPrice!!)} (cached)")
                             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                             manager.notify(NOTIFICATION_ID, notification)
                         }

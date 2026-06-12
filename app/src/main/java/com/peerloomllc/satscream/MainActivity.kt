@@ -71,12 +71,6 @@ class MainActivity : AppCompatActivity() {
         private const val PREF_LAST_UPDATE_TIME = "LAST_UPDATE_TIME"
     }
 
-    // Helper function to format price as whole number with commas
-    private fun formatPrice(price: Double): String {
-        val wholePrice = price.toLong()
-        return String.format(Locale.US, "$%,d", wholePrice)
-    }
-
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -239,8 +233,8 @@ class MainActivity : AppCompatActivity() {
             updatePriceDisplay(price)
         }
 
-        // Update alert status display
-        updateAlertStatusDisplay()
+        // Update alert status display (also reflects HIT state / icons consistently)
+        updateAlertStatusDisplays()
     }
 
     private fun startBitcoinService() {
@@ -260,7 +254,7 @@ class MainActivity : AppCompatActivity() {
         // Load saved pump alert STATUS only
         val savedPumpPrice = sharedPrefs.getFloat("TARGET_PRICE_PUMP", 0f)
         if (savedPumpPrice > 0f) {
-            tvPumpAlertStatus.text = "Pump alert: ${formatPrice(savedPumpPrice.toDouble())}"
+            tvPumpAlertStatus.text = "Pump alert: ${BtcPrice.formatUsd(savedPumpPrice.toDouble())}"
         } else {
             tvPumpAlertStatus.text = "No pump alert set"
         }
@@ -268,7 +262,7 @@ class MainActivity : AppCompatActivity() {
         // Load saved dump alert STATUS only
         val savedDumpPrice = sharedPrefs.getFloat("TARGET_PRICE_DUMP", 0f)
         if (savedDumpPrice > 0f) {
-            tvDumpAlertStatus.text = "Dump alert: ${formatPrice(savedDumpPrice.toDouble())}"
+            tvDumpAlertStatus.text = "Dump alert: ${BtcPrice.formatUsd(savedDumpPrice.toDouble())}"
         } else {
             tvDumpAlertStatus.text = "No dump alert set"
         }
@@ -400,7 +394,7 @@ class MainActivity : AppCompatActivity() {
                         if (isBitcoinStandardMode) {
                             tvPumpAlertStatus.text = "Pump alert: ${targetPrice.toLong()} sats/$"
                         } else {
-                            tvPumpAlertStatus.text = "Pump alert: ${formatPrice(targetPrice.toDouble())}"
+                            tvPumpAlertStatus.text = "Pump alert: ${BtcPrice.formatUsd(targetPrice.toDouble())}"
                         }
                         Toast.makeText(this, "Pump Alert Set!", Toast.LENGTH_SHORT).show()
                     } else {
@@ -414,7 +408,7 @@ class MainActivity : AppCompatActivity() {
                         if (isBitcoinStandardMode) {
                             tvDumpAlertStatus.text = "Dump alert: ${targetPrice.toLong()} sats/$"
                         } else {
-                            tvDumpAlertStatus.text = "Dump alert: ${formatPrice(targetPrice.toDouble())}"
+                            tvDumpAlertStatus.text = "Dump alert: ${BtcPrice.formatUsd(targetPrice.toDouble())}"
                         }
                         Toast.makeText(this, "Dump Alert Set!", Toast.LENGTH_SHORT).show()
                     }
@@ -465,13 +459,12 @@ class MainActivity : AppCompatActivity() {
     private fun updatePriceDisplay(price: Double) {
         currentPrice = price
 
-        if (isBitcoinStandardMode) {
+        tvPrice.text = if (isBitcoinStandardMode) {
             // Bitcoin Standard Mode: Show sats per dollar
-            val satsPerDollar = (100_000_000.0 / price).toLong()
-            tvPrice.text = "${String.format(Locale.US, "%,d", satsPerDollar)}/$"
+            BtcPrice.formatSatsPerDollar(price)
         } else {
             // Fiat Mode: Show USD price
-            tvPrice.text = formatPrice(price)
+            BtcPrice.formatUsd(price)
         }
     }
 
@@ -490,160 +483,92 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateAlertStatusDisplay() {
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
-        val pumpTarget = sharedPrefs.getFloat("TARGET_PRICE_PUMP", 0f)
-        val dumpTarget = sharedPrefs.getFloat("TARGET_PRICE_DUMP", 0f)
-        val pumpWasSetInBitcoinMode = sharedPrefs.getBoolean("PUMP_ALERT_IS_BITCOIN_MODE", false)
-        val dumpWasSetInBitcoinMode = sharedPrefs.getBoolean("DUMP_ALERT_IS_BITCOIN_MODE", false)
-
-        // PUMP ALERT DISPLAY
-        if (pumpTarget > 0) {
-            if (isBitcoinStandardMode) {
-                // Currently in Bitcoin Standard Mode
-                if (pumpWasSetInBitcoinMode) {
-                    // Was set in Bitcoin mode, display as-is
-                    tvPumpAlertStatus.text = "Pump alert: ${pumpTarget.toLong()} sats/$"
-                } else {
-                    // Was set in Fiat mode, convert USD to sats/$
-                    val satsPerDollar = (100_000_000.0 / pumpTarget.toDouble()).toLong()
-                    tvPumpAlertStatus.text = "Pump alert: ${String.format(Locale.US, "%,d", satsPerDollar)} sats/$"
-                }
-            } else {
-                // Currently in Fiat Mode
-                if (pumpWasSetInBitcoinMode) {
-                    // Was set in Bitcoin mode, convert sats/$ to USD
-                    val usdPrice = 100_000_000.0 / pumpTarget.toDouble()
-                    tvPumpAlertStatus.text = "Pump alert: ${formatPrice(usdPrice)}"
-                } else {
-                    // Was set in Fiat mode, display as-is
-                    tvPumpAlertStatus.text = "Pump alert: ${formatPrice(pumpTarget.toDouble())}"
-                }
-            }
-        } else {
-            tvPumpAlertStatus.text = "No pump alert set"
-        }
-
-        // DUMP ALERT DISPLAY
-        if (dumpTarget > 0) {
-            if (isBitcoinStandardMode) {
-                // Currently in Bitcoin Standard Mode
-                if (dumpWasSetInBitcoinMode) {
-                    // Was set in Bitcoin mode, display as-is
-                    tvDumpAlertStatus.text = "Dump alert: ${dumpTarget.toLong()} sats/$"
-                } else {
-                    // Was set in Fiat mode, convert USD to sats/$
-                    val satsPerDollar = (100_000_000.0 / dumpTarget.toDouble()).toLong()
-                    tvDumpAlertStatus.text = "Dump alert: ${String.format(Locale.US, "%,d", satsPerDollar)} sats/$"
-                }
-            } else {
-                // Currently in Fiat Mode
-                if (dumpWasSetInBitcoinMode) {
-                    // Was set in Bitcoin mode, convert sats/$ to USD
-                    val usdPrice = 100_000_000.0 / dumpTarget.toDouble()
-                    tvDumpAlertStatus.text = "Dump alert: ${formatPrice(usdPrice)}"
-                } else {
-                    // Was set in Fiat mode, display as-is
-                    tvDumpAlertStatus.text = "Dump alert: ${formatPrice(dumpTarget.toDouble())}"
-                }
-            }
-        } else {
-            tvDumpAlertStatus.text = "No dump alert set"
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
     private fun updateAlertStatusDisplays() {
         val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
         val lastPrice = sharedPrefs.getFloat(PREF_LAST_PRICE, 0f)
-
-        // Determine which icon set to use based on current theme
         val isDarkMode = sharedPrefs.getBoolean(PREF_DARK_MODE, false)
-        val pumpIcon = if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light
-        val dumpIcon = if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light
 
-        // Update PUMP alert display
-        val pumpTarget = sharedPrefs.getFloat("TARGET_PRICE_PUMP", 0f)
-        val pumpTriggered = sharedPrefs.getBoolean("PUMP_ALERT_TRIGGERED", false)
-        val pumpWasSetInBitcoinMode = sharedPrefs.getBoolean("PUMP_ALERT_IS_BITCOIN_MODE", false)
+        renderAlertStatus(
+            label = "Pump",
+            target = sharedPrefs.getFloat("TARGET_PRICE_PUMP", 0f),
+            triggered = sharedPrefs.getBoolean("PUMP_ALERT_TRIGGERED", false),
+            wasSetInBitcoinMode = sharedPrefs.getBoolean("PUMP_ALERT_IS_BITCOIN_MODE", false),
+            lastPrice = lastPrice,
+            statusView = tvPumpAlertStatus,
+            iconView = ivPumpIcon,
+            hitIcon = if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light
+        )
+        renderAlertStatus(
+            label = "Dump",
+            target = sharedPrefs.getFloat("TARGET_PRICE_DUMP", 0f),
+            triggered = sharedPrefs.getBoolean("DUMP_ALERT_TRIGGERED", false),
+            wasSetInBitcoinMode = sharedPrefs.getBoolean("DUMP_ALERT_IS_BITCOIN_MODE", false),
+            lastPrice = lastPrice,
+            statusView = tvDumpAlertStatus,
+            iconView = ivDumpIcon,
+            hitIcon = if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light
+        )
+    }
 
-        if (pumpTarget > 0f) {
-            if (pumpTriggered) {
-                if (isBitcoinStandardMode) {
-                    val satsPerDollar = (100_000_000.0 / lastPrice.toDouble()).toLong()
-                    tvPumpAlertStatus.text = "PUMP HIT: ${String.format(Locale.US, "%,d", satsPerDollar)} sats/$"
-                } else {
-                    tvPumpAlertStatus.text = "PUMP HIT: ${formatPrice(lastPrice.toDouble())}"
-                }
-                // Show the pump icon
-                ivPumpIcon.setImageResource(pumpIcon)
-                ivPumpIcon.visibility = View.VISIBLE
-            } else {
-                // Not triggered - use conversion logic from updateAlertStatusDisplay
-                if (isBitcoinStandardMode) {
-                    if (pumpWasSetInBitcoinMode) {
-                        tvPumpAlertStatus.text = "Pump alert: ${pumpTarget.toLong()} sats/$"
-                    } else {
-                        val satsPerDollar = (100_000_000.0 / pumpTarget.toDouble()).toLong()
-                        tvPumpAlertStatus.text = "Pump alert: ${String.format(Locale.US, "%,d", satsPerDollar)} sats/$"
-                    }
-                } else {
-                    if (pumpWasSetInBitcoinMode) {
-                        val usdPrice = 100_000_000.0 / pumpTarget.toDouble()
-                        tvPumpAlertStatus.text = "Pump alert: ${formatPrice(usdPrice)}"
-                    } else {
-                        tvPumpAlertStatus.text = "Pump alert: ${formatPrice(pumpTarget.toDouble())}"
-                    }
-                }
-                // Hide the pump icon
-                ivPumpIcon.visibility = View.INVISIBLE
-            }
-        } else {
-            tvPumpAlertStatus.text = "No pump alert set"
-            // Hide the pump icon
-            ivPumpIcon.visibility = View.INVISIBLE
+    /**
+     * Renders a single alert's status line and hit icon, handling the Fiat <-> Bitcoin-Standard
+     * display conversion. Replaces the former duplicated pump/dump blocks and the separate
+     * updateAlertStatusDisplay()/updateAlertStatusDisplays() pair, so the firing and display
+     * logic can no longer drift apart.
+     */
+    @SuppressLint("SetTextI18n")
+    private fun renderAlertStatus(
+        label: String,
+        target: Float,
+        triggered: Boolean,
+        wasSetInBitcoinMode: Boolean,
+        lastPrice: Float,
+        statusView: TextView,
+        iconView: ImageView,
+        hitIcon: Int
+    ) {
+        if (target <= 0f) {
+            statusView.text = "No ${label.lowercase(Locale.US)} alert set"
+            iconView.visibility = View.INVISIBLE
+            return
         }
 
-        // Update DUMP alert display
-        val dumpTarget = sharedPrefs.getFloat("TARGET_PRICE_DUMP", 0f)
-        val dumpTriggered = sharedPrefs.getBoolean("DUMP_ALERT_TRIGGERED", false)
-        val dumpWasSetInBitcoinMode = sharedPrefs.getBoolean("DUMP_ALERT_IS_BITCOIN_MODE", false)
-
-        if (dumpTarget > 0f) {
-            if (dumpTriggered) {
-                if (isBitcoinStandardMode) {
-                    val satsPerDollar = (100_000_000.0 / lastPrice.toDouble()).toLong()
-                    tvDumpAlertStatus.text = "DUMP HIT: ${String.format(Locale.US, "%,d", satsPerDollar)} sats/$"
-                } else {
-                    tvDumpAlertStatus.text = "DUMP HIT: ${formatPrice(lastPrice.toDouble())}"
-                }
-                // Show the dump icon
-                ivDumpIcon.setImageResource(dumpIcon)
-                ivDumpIcon.visibility = View.VISIBLE
+        if (triggered) {
+            val priceText = if (isBitcoinStandardMode) {
+                "${String.format(Locale.US, "%,d", BtcPrice.satsPerDollar(lastPrice.toDouble()))} sats/$"
             } else {
-                // Not triggered - use conversion logic from updateAlertStatusDisplay
-                if (isBitcoinStandardMode) {
-                    if (dumpWasSetInBitcoinMode) {
-                        tvDumpAlertStatus.text = "Dump alert: ${dumpTarget.toLong()} sats/$"
-                    } else {
-                        val satsPerDollar = (100_000_000.0 / dumpTarget.toDouble()).toLong()
-                        tvDumpAlertStatus.text = "Dump alert: ${String.format(Locale.US, "%,d", satsPerDollar)} sats/$"
-                    }
-                } else {
-                    if (dumpWasSetInBitcoinMode) {
-                        val usdPrice = 100_000_000.0 / dumpTarget.toDouble()
-                        tvDumpAlertStatus.text = "Dump alert: ${formatPrice(usdPrice)}"
-                    } else {
-                        tvDumpAlertStatus.text = "Dump alert: ${formatPrice(dumpTarget.toDouble())}"
-                    }
-                }
-                // Hide the dump icon
-                ivDumpIcon.visibility = View.INVISIBLE
+                BtcPrice.formatUsd(lastPrice.toDouble())
+            }
+            statusView.text = "${label.uppercase(Locale.US)} HIT: $priceText"
+            iconView.setImageResource(hitIcon)
+            iconView.visibility = View.VISIBLE
+        } else {
+            statusView.text = "$label alert: ${formatAlertTarget(target, wasSetInBitcoinMode)}"
+            iconView.visibility = View.INVISIBLE
+        }
+    }
+
+    /**
+     * Formats a stored alert target for display in the current mode, converting it if the
+     * target was originally set in the other mode.
+     */
+    private fun formatAlertTarget(target: Float, wasSetInBitcoinMode: Boolean): String {
+        return if (isBitcoinStandardMode) {
+            if (wasSetInBitcoinMode) {
+                // Entered as sats/$ — display as-is
+                "${target.toLong()} sats/$"
+            } else {
+                // Entered as USD — convert to sats/$
+                "${String.format(Locale.US, "%,d", BtcPrice.satsPerDollar(target.toDouble()))} sats/$"
             }
         } else {
-            tvDumpAlertStatus.text = "No dump alert set"
-            // Hide the dump icon
-            ivDumpIcon.visibility = View.INVISIBLE
+            if (wasSetInBitcoinMode) {
+                // Entered as sats/$ — convert to USD
+                BtcPrice.formatUsd(BtcPrice.SATS_PER_BTC / target.toDouble())
+            } else {
+                // Entered as USD — display as-is
+                BtcPrice.formatUsd(target.toDouble())
+            }
         }
     }
 
