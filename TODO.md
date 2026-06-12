@@ -18,10 +18,10 @@ Each item: `- [ ] Description` with metadata tags: `[type]` `[complexity]` `[pri
 
 ### Build & Dependencies
 
-- [ ] Remove Gson — declared in `app/build.gradle.kts` but never used (JSON is parsed with `kotlinx.serialization`) `[refactor]` `[small]` `[medium]`
-- [ ] Remove all of Jetpack Compose — enabled (`buildFeatures.compose`, compose plugin, `compose-bom`, `material3`, `activity-compose`, `ui-tooling`) and `ui/theme/` exists, but nothing uses it (UI is 100% XML Views, no `setContent {}`). Shrinks APK and speeds up builds `[refactor]` `[medium]` `[medium]`
-- [ ] De-duplicate conflicting dependency declarations — `core-ktx` and `lifecycle-runtime-ktx` are declared both via the version catalog and as hardcoded `implementation("…")` lines with different versions. Keep the catalog as the single source `[refactor]` `[small]` `[medium]`
-- [ ] Remove the unused `WAKE_LOCK` permission from `AndroidManifest.xml` (declared but never acquired) — or actually acquire it if alerts must fire during device doze `[refactor]` `[small]` `[low]`
+- [x] Remove Gson — was declared in `app/build.gradle.kts` but never used (JSON is parsed with `kotlinx.serialization`). Removed in #2. `[refactor]` `[small]` `[medium]`
+- [x] Remove all of Jetpack Compose — plugin, `buildFeatures.compose`, all Compose dependencies, version-catalog entries, and the unused `ui/theme/` files. UI is 100% XML Views. Removed in #2; `assembleDebug`/`assembleRelease` and Pixel 9 run verified. `[refactor]` `[medium]` `[medium]`
+- [x] De-duplicate conflicting dependency declarations — dropped the hardcoded `core-ktx`/`lifecycle-runtime-ktx` lines and bumped the version-catalog entries to those versions (catalog is now the single source, effective versions unchanged). Done in #2. `[refactor]` `[small]` `[medium]`
+- [x] Remove the unused `WAKE_LOCK` permission from `AndroidManifest.xml` (declared but never acquired). Removed in #2. `[refactor]` `[small]` `[low]`
 
 ### Code Quality / Refactors
 
