@@ -25,10 +25,10 @@ Each item: `- [ ] Description` with metadata tags: `[type]` `[complexity]` `[pri
 
 ### Code Quality / Refactors
 
-- [ ] Consolidate the duplicated `formatPrice()` helper copy-pasted in `MainActivity`, `BitcoinService`, and `BitcoinWidget` into one shared util `[refactor]` `[small]` `[medium]`
-- [ ] Extract the Fiat ↔ Bitcoin-Standard conversion/comparison logic into a shared util — currently duplicated between `BitcoinService` (alert firing) and `MainActivity`, and `MainActivity` has two overlapping methods (`updateAlertStatusDisplay` and the near-identical `updateAlertStatusDisplays`). Merge them to stop the firing/display logic drifting out of sync `[refactor]` `[medium]` `[medium]`
-- [ ] Centralize SharedPreferences keys — constants exist in `BitcoinService.companion` but most call sites use raw string literals (`"TARGET_PRICE_PUMP"`, `"BITCOIN_STANDARD_MODE"`, `"CUSTOM_PUMP_AUDIO_PATH"`, …). Move to one shared object so a rename can't silently break the prefs-as-IPC bus `[refactor]` `[small]` `[medium]`
-- [ ] Release `MediaPlayer` on completion — add `setOnCompletionListener { it.release() }` to avoid leaking native players. (Done in `AudioSettingsActivity.playTestAudio()` alongside the `prepareAsync` change; still TODO in `BitcoinService.playAlertSound()`.) `[bug]` `[small]` `[low]`
+- [x] Consolidate the duplicated `formatPrice()` helper into a shared `BtcPrice` util (`formatUsd`/`satsPerDollar`/`formatSatsPerDollar` + `SATS_PER_BTC`), used by `MainActivity`, `BitcoinService`, and `BitcoinWidget`. Verified on Pixel 9. `[refactor]` `[small]` `[medium]`
+- [x] Extract the Fiat ↔ Bitcoin-Standard conversion into `BtcPrice`, and merge `MainActivity`'s overlapping `updateAlertStatusDisplay`/`updateAlertStatusDisplays` into one method backed by a per-alert `renderAlertStatus()` helper (also fixes HIT state not rendering after a mode toggle). Verified on Pixel 9. `[refactor]` `[medium]` `[medium]`
+- [x] Centralize SharedPreferences keys in a `Prefs` object (file name + all 15 keys); replaced every raw literal and the old `KEY_*`/`PREF_*` constants. String values unchanged (on-disk compatible). Verified on Pixel 9. `[refactor]` `[small]` `[medium]`
+- [x] Release `MediaPlayer` on completion — done in both `AudioSettingsActivity.playTestAudio()` (PR #1) and `BitcoinService.playAlertSound()` (self-releasing factory). `[bug]` `[small]` `[low]`
 
 ### Widget
 

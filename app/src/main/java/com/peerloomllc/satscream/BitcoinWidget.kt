@@ -13,7 +13,6 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.TypedValue
 import android.widget.RemoteViews
-import java.util.Locale
 
 class BitcoinWidget : AppWidgetProvider() {
 
@@ -54,10 +53,10 @@ class BitcoinWidget : AppWidgetProvider() {
             appWidgetId: Int
         ) {
             // Get shared preferences
-            val prefs = context.getSharedPreferences("BitcoinPrefs", Context.MODE_PRIVATE)
-            val price = prefs.getFloat("LAST_PRICE", 0f).toDouble()
-            val isBitcoinStandardMode = prefs.getBoolean("BITCOIN_STANDARD_MODE", false)
-            val isDarkMode = prefs.getBoolean("DARK_MODE", false)
+            val prefs = context.getSharedPreferences(Prefs.FILE, Context.MODE_PRIVATE)
+            val price = prefs.getFloat(Prefs.LAST_PRICE, 0f).toDouble()
+            val isBitcoinStandardMode = prefs.getBoolean(Prefs.BITCOIN_STANDARD_MODE, false)
+            val isDarkMode = prefs.getBoolean(Prefs.DARK_MODE, false)
 
             // Get widget dimensions for dynamic text sizing
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
@@ -74,12 +73,10 @@ class BitcoinWidget : AppWidgetProvider() {
             // Format and set price based on mode
             val priceText = if (isBitcoinStandardMode) {
                 // Bitcoin Standard Mode: Show sats per dollar
-                val satsPerDollar = (100_000_000.0 / price).toLong()
-                String.format(Locale.US, "%,d/$", satsPerDollar)
+                BtcPrice.formatSatsPerDollar(price)
             } else {
                 // Fiat Mode: Show USD price
-                val wholePrice = price.toLong()
-                String.format(Locale.US, "$%,d", wholePrice)
+                BtcPrice.formatUsd(price)
             }
 
             views.setTextViewText(R.id.tvWidgetPrice, priceText)

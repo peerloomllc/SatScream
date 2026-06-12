@@ -119,7 +119,7 @@ class AudioSettingsActivity : AppCompatActivity() {
         // 10 MB file) is blocking I/O. Run it off the main thread to avoid ANRs and marshal
         // user-facing feedback back to main.
         lifecycleScope.launch {
-            val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+            val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
 
             try {
                 // Get file size
@@ -170,8 +170,8 @@ class AudioSettingsActivity : AppCompatActivity() {
                 }
 
                 // Save the internal file path AND original filename
-                val pathKey = if (isPump) "CUSTOM_PUMP_AUDIO_PATH" else "CUSTOM_DUMP_AUDIO_PATH"
-                val nameKey = if (isPump) "CUSTOM_PUMP_AUDIO_NAME" else "CUSTOM_DUMP_AUDIO_NAME"
+                val pathKey = if (isPump) Prefs.CUSTOM_PUMP_AUDIO_PATH else Prefs.CUSTOM_DUMP_AUDIO_PATH
+                val nameKey = if (isPump) Prefs.CUSTOM_PUMP_AUDIO_NAME else Prefs.CUSTOM_DUMP_AUDIO_NAME
 
                 sharedPrefs.edit {
                     putString(pathKey, outputFile.absolutePath)
@@ -232,9 +232,9 @@ class AudioSettingsActivity : AppCompatActivity() {
     }
 
     private fun resetToDefault(isPump: Boolean) {
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
-        val pathKey = if (isPump) "CUSTOM_PUMP_AUDIO_PATH" else "CUSTOM_DUMP_AUDIO_PATH"
-        val nameKey = if (isPump) "CUSTOM_PUMP_AUDIO_NAME" else "CUSTOM_DUMP_AUDIO_NAME"
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+        val pathKey = if (isPump) Prefs.CUSTOM_PUMP_AUDIO_PATH else Prefs.CUSTOM_DUMP_AUDIO_PATH
+        val nameKey = if (isPump) Prefs.CUSTOM_PUMP_AUDIO_NAME else Prefs.CUSTOM_DUMP_AUDIO_NAME
 
         // Remove the custom audio file
         val filePath = sharedPrefs.getString(pathKey, null)
@@ -266,8 +266,8 @@ class AudioSettingsActivity : AppCompatActivity() {
             mediaPlayer?.release()
             mediaPlayer = null
 
-            val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
-            val customAudioKey = if (isPump) "CUSTOM_PUMP_AUDIO_PATH" else "CUSTOM_DUMP_AUDIO_PATH"
+            val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+            val customAudioKey = if (isPump) Prefs.CUSTOM_PUMP_AUDIO_PATH else Prefs.CUSTOM_DUMP_AUDIO_PATH
             val customAudioPath = sharedPrefs.getString(customAudioKey, null)
 
             // prepareAsync() keeps decoding off the main thread (synchronous prepare() can
@@ -316,11 +316,11 @@ class AudioSettingsActivity : AppCompatActivity() {
     }
 
     private fun updateAudioStatus() {
-        val sharedPrefs = getSharedPreferences("BitcoinPrefs", MODE_PRIVATE)
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
 
         // Update pump audio status
-        val pumpPath = sharedPrefs.getString("CUSTOM_PUMP_AUDIO_PATH", null)
-        val pumpName = sharedPrefs.getString("CUSTOM_PUMP_AUDIO_NAME", null)
+        val pumpPath = sharedPrefs.getString(Prefs.CUSTOM_PUMP_AUDIO_PATH, null)
+        val pumpName = sharedPrefs.getString(Prefs.CUSTOM_PUMP_AUDIO_NAME, null)
 
         android.util.Log.d("AudioSettings", "Pump - Path: $pumpPath, Name: $pumpName")
 
@@ -334,8 +334,8 @@ class AudioSettingsActivity : AppCompatActivity() {
         }
 
         // Update dump audio status
-        val dumpPath = sharedPrefs.getString("CUSTOM_DUMP_AUDIO_PATH", null)
-        val dumpName = sharedPrefs.getString("CUSTOM_DUMP_AUDIO_NAME", null)
+        val dumpPath = sharedPrefs.getString(Prefs.CUSTOM_DUMP_AUDIO_PATH, null)
+        val dumpName = sharedPrefs.getString(Prefs.CUSTOM_DUMP_AUDIO_NAME, null)
 
         android.util.Log.d("AudioSettings", "Dump - Path: $dumpPath, Name: $dumpName")
 
