@@ -405,6 +405,16 @@ class BitcoinService : Service() {
 
     private var mediaPlayer: MediaPlayer? = null
 
+    // Creates a MediaPlayer that releases itself once playback finishes, so a short alert
+    // sound doesn't leak a native player until the next alert or onDestroy().
+    private fun newSelfReleasingPlayer(): MediaPlayer =
+        MediaPlayer().apply {
+            setOnCompletionListener { mp ->
+                mp.release()
+                if (mediaPlayer === mp) mediaPlayer = null
+            }
+        }
+
     private fun playAlertSound(isPump: Boolean) {
         try {
             // Release any existing MediaPlayer
@@ -432,7 +442,7 @@ class BitcoinService : Service() {
             if (useCustomAudio && customAudioPath != null) {
                 // Use custom audio file
                 try {
-                    mediaPlayer = MediaPlayer()
+                    mediaPlayer = newSelfReleasingPlayer()
                     mediaPlayer?.setDataSource(customAudioPath)
                     mediaPlayer?.prepare()
                     mediaPlayer?.start()
@@ -453,7 +463,7 @@ class BitcoinService : Service() {
 
                 val afd = assets.openFd(assetFileName)
 
-                mediaPlayer = MediaPlayer()
+                mediaPlayer = newSelfReleasingPlayer()
                 mediaPlayer?.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
                 afd.close()
 
