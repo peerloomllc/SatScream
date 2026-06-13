@@ -6,10 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.TypedValue
 import android.widget.RemoteViews
@@ -91,28 +88,14 @@ class BitcoinWidget : AppWidgetProvider() {
                 Color.parseColor("#212121")  // text_primary_light
             }
 
-            val backgroundColor = if (isDarkMode) {
-                Color.parseColor("#121212")  // background_main dark
-            } else {
-                Color.parseColor("#FFFFFF")  // background_main light
-            }
-
             views.setTextColor(R.id.tvWidgetPrice, textPrimaryColor)
 
-            // Create a shape drawable with rounded corners (no border)
-            val shape = GradientDrawable()
-            shape.shape = GradientDrawable.RECTANGLE
-            shape.setColor(backgroundColor)
-            shape.cornerRadius = 32f  // Rounded corners
-
-            // Create bitmap with proper aspect ratio for square shape
-            val size = 400  // Square size for proper rounded corners
-            val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-            shape.setBounds(0, 0, canvas.width, canvas.height)
-            shape.draw(canvas)
-
-            views.setImageViewBitmap(R.id.widgetBackground, bitmap)
+            // Theme-aware rounded background as a static drawable — avoids allocating a fresh
+            // 400x400 ARGB_8888 bitmap on every widget update.
+            views.setImageViewResource(
+                R.id.widgetBackground,
+                if (isDarkMode) R.drawable.widget_background_dark else R.drawable.widget_background_light
+            )
 
             // Create intent to launch MainActivity when widget is clicked
             val intent = Intent(context, MainActivity::class.java)

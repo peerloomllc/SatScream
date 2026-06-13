@@ -32,7 +32,7 @@ Each item: `- [ ] Description` with metadata tags: `[type]` `[complexity]` `[pri
 
 ### Widget
 
-- [ ] Stop allocating a 400×400 `ARGB_8888` bitmap on every widget update (`BitcoinWidget.kt:111`) — replace the canvas-drawn rounded background with a static `res/drawable` XML shape used as the layout background. Removes per-update (~640 KB) allocation / GC pressure `[polish]` `[small]` `[medium]`
+- [x] Stop allocating a 400×400 `ARGB_8888` bitmap on every widget update — `BitcoinWidget` now selects a static `res/drawable` shape (`widget_background_light`/`widget_background_dark`, 20dp corners) via `setImageViewResource`. Removes the per-update (~640 KB) allocation. Verified on Pixel 9. `[polish]` `[small]` `[medium]`
 
 ### Investigations
 
