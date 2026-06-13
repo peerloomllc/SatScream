@@ -390,6 +390,12 @@ class BitcoinViewModel: ObservableObject {
 
     // MARK: - Audio
     func playAlertSound(isPump: Bool) {
+        // Route to .playback so the alert is audible even with the ring/silent switch on,
+        // and activate the session — without this an AVAudioPlayer often produces no sound.
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.playback, mode: .default, options: [])
+        try? session.setActive(true)
+
         let customPathKey = isPump ? Prefs.customPumpAudioPath : Prefs.customDumpAudioPath
 
         if let customPath = defaults.string(forKey: customPathKey) {
