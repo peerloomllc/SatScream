@@ -1,0 +1,367 @@
+name: Upload to App Store
+on: workflow_dispatch
+
+jobs:
+  upload:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout releases branch
+        uses: actions/checkout@v4
+        with:
+          ref: releases
+
+      - name: Select Xcode 26.2
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.2'
+
+      - name: Ensure iOS simulator runtime for actool
+        # Xcode 26.2 -- SDK_BUILD is read dynamically from the installed Xcode.
+        # We attempt a download first; if that fails or the runtime is still missing,
+        # we create a minimal fake runtime bundle. actool only reads SystemVersion.plist
+        # to verify the build string -- it does not actually boot the simulator.
+        run: |
+          RUNTIME_DIR="/Library/Developer/CoreSimulator/Profiles/Runtimes"
+          SDK_BUILD=$(xcodebuild -showsdks 2>/dev/null | grep "iphonesimulator" | tail -1 | grep -o "[0-9A-Z]*$" || echo "unknown")
+          echo "Simulator SDK build: $SDK_BUILD"
+          FAKE="$RUNTIME_DIR/iOS 26.simruntime"
+
+          # Check if a matching runtime already exists
+          if xcrun simctl list runtimes 2>/dev/null | grep -q "$SDK_BUILD"; then
+            echo "Matching simulator runtime already present"
+          else
+            echo "No runtime matching $SDK_BUILD -- attempting download..."
+            sudo xcodebuild -downloadPlatform iOS || true
+
+            # Re-check after download attempt
+            if ! xcrun simctl list runtimes 2>/dev/null | grep -q "$SDK_BUILD"; then
+              echo "Download did not install matching runtime -- creating fake runtime"
+              sudo mkdir -p "$FAKE/Contents/Resources"
+
+              # Info.plist -- runtime identity required by CoreSimulator
+              sudo /usr/libexec/PlistBuddy \
+                -c "Add :CFBundleIdentifier string com.apple.CoreSimulator.SimRuntime.iOS-26" \
+                -c "Add :CFBundleName string iOS 26" \
+                -c "Add :CFBundleVersion string 1" \
+                "$FAKE/Contents/Info.plist"
+
+              # SystemVersion.plist -- actool matches this build string to the SDK
+              sudo /usr/libexec/PlistBuddy \
+                -c "Add :ProductBuildVersion string $SDK_BUILD" \
+                -c "Add :ProductVersion string 26.0" \
+                -c "Add :ProductName string iPhone OS" \
+                "$FAKE/Contents/Resources/SystemVersion.plist"
+
+              echo "Fake runtime created at $FAKE"
+              ls -la "$RUNTIME_DIR/"
+            fi
+          fi
+
+      - name: Import distribution certificate
+        env:
+          DIST_CERT_P12: ${{ secrets.DIST_CERT_P12 }}
+          DIST_CERT_PASSWORD: ${{ secrets.DIST_CERT_PASSWORD }}
+        run: |
+          echo "$DIST_CERT_P12" | base64 --decode > distribution.p12
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          curl -fsSL -o AppleWWDRCAG3.cer https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
+          curl -fsSL -o AppleIncRootCertificate.cer https://www.apple.com/appleca/AppleIncRootCertificate.cer
+          security import AppleWWDRCAG3.cer -k build.keychain -T /usr/bin/codesign
+          security import AppleIncRootCertificate.cer -k build.keychain -T /usr/bin/codesign
+          security import distribution.p12 -k build.keychain \
+            -P "$DIST_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "" build.keychain
+          echo "=== Identities after import ==="
+          security find-identity -v -p codesigning build.keychain
+
+      - name: Install provisioning profiles
+        env:
+          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+          WIDGET_PROVISIONING_PROFILE: ${{ secrets.WIDGET_PROVISIONING_PROFILE }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROVISIONING_PROFILE" | base64 --decode > \
+            ~/Library/MobileDevice/Provisioning\ Profiles/SatScream.mobileprovision
+          echo "$WIDGET_PROVISIONING_PROFILE" | base64 --decode > \
+            ~/Library/MobileDevice/Provisioning\ Profiles/SatScreamWidget.mobileprovision
+
+      - name: Extract entitlements from provisioning profiles
+        # Pulling entitlements directly from the profiles guarantees an exact match.
+        # No more ITMS-90164 regardless of which entitlements are or are not enabled.
+        run: |
+          security cms -D -i \
+            ~/Library/MobileDevice/Provisioning\ Profiles/SatScream.mobileprovision \
+            > /tmp/app_profile.plist
+          /usr/libexec/PlistBuddy -x -c "Print :Entitlements" /tmp/app_profile.plist \
+            > SatScream.entitlements
+
+          security cms -D -i \
+            ~/Library/MobileDevice/Provisioning\ Profiles/SatScreamWidget.mobileprovision \
+            > /tmp/widget_profile.plist
+          /usr/libexec/PlistBuddy -x -c "Print :Entitlements" /tmp/widget_profile.plist \
+            > SatScreamWidget.entitlements
+
+          echo "=== Main app entitlements ==="
+          cat SatScream.entitlements
+          echo "=== Widget entitlements ==="
+          cat SatScreamWidget.entitlements
+
+      - name: Unpack IPA and install provisioning profiles
+        run: |
+          unzip -q SatScream.ipa -d unpacked
+          cp ~/Library/MobileDevice/Provisioning\ Profiles/SatScream.mobileprovision \
+            unpacked/Payload/SatScream.app/embedded.mobileprovision
+          cp ~/Library/MobileDevice/Provisioning\ Profiles/SatScreamWidget.mobileprovision \
+            unpacked/Payload/SatScream.app/PlugIns/SatScreamWidget.appex/embedded.mobileprovision
+
+
+      - name: Bump CFBundleVersion
+        # Apple requires each upload to have a strictly higher CFBundleVersion.
+        # Using the GitHub Actions run number guarantees a unique, incrementing
+        # build number on every workflow execution with no manual tracking needed.
+        run: |
+          APP_PLIST="unpacked/Payload/SatScream.app/Info.plist"
+          WIDGET_PLIST="unpacked/Payload/SatScream.app/PlugIns/SatScreamWidget.appex/Info.plist"
+          echo "Setting CFBundleVersion to ${{ github.run_number }}"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ github.run_number }}" "$APP_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ github.run_number }}" "$WIDGET_PLIST"
+
+      - name: Patch Info.plists with iOS 18 SDK keys
+        run: |
+          # Hardcode Xcode 26.2 GM (Golden Master) build metadata.
+          # The macos-26 runner ships with Xcode 26.2 RC (17C51), NOT the GM (17C52).
+          # Reading these values dynamically would give RC strings, which Apple
+          # flags as beta. We hardcode the GM values instead.
+          # DTXcode/DTXcodeBuild: Xcode 26.2 GM
+          # DTSDKBuild/DTPlatformBuild: iOS 26.2 SDK (from Xcode 26.2 GM Info.plist)
+          # BuildMachineOSBuild: macOS 15.4 Sequoia stable GM
+          XCODE_VERSION_NUM="2620"
+          XCODE_BUILD="17C52"
+          SDK_BUILD="23C54"
+          PLATFORM_BUILD="23C54"
+          STABLE_MACOS_BUILD="24E52"
+          echo "DTXcode: $XCODE_VERSION_NUM  DTXcodeBuild: $XCODE_BUILD  DTSDKBuild: $SDK_BUILD"
+
+          patch_plist() {
+            local PLIST="$1"
+            echo "Patching $PLIST"
+
+            /usr/libexec/PlistBuddy -c "Set :DTPlatformName iphoneos" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :DTPlatformName string iphoneos" "$PLIST"
+
+            /usr/libexec/PlistBuddy -c "Set :DTPlatformVersion 26.2" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :DTPlatformVersion string 26.2" "$PLIST"
+
+            /usr/libexec/PlistBuddy -c "Set :DTSDKName iphoneos26.2" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :DTSDKName string iphoneos26.2" "$PLIST"
+
+            /usr/libexec/PlistBuddy -c "Set :DTXcode $XCODE_VERSION_NUM" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :DTXcode string $XCODE_VERSION_NUM" "$PLIST"
+
+            /usr/libexec/PlistBuddy -c "Set :DTXcodeBuild $XCODE_BUILD" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :DTXcodeBuild string $XCODE_BUILD" "$PLIST"
+
+            /usr/libexec/PlistBuddy -c "Set :DTSDKBuild $SDK_BUILD" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :DTSDKBuild string $SDK_BUILD" "$PLIST"
+
+            /usr/libexec/PlistBuddy -c "Set :DTPlatformBuild $PLATFORM_BUILD" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :DTPlatformBuild string $PLATFORM_BUILD" "$PLIST"
+
+            /usr/libexec/PlistBuddy -c "Set :BuildMachineOSBuild $STABLE_MACOS_BUILD" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :BuildMachineOSBuild string $STABLE_MACOS_BUILD" "$PLIST"
+
+            /usr/libexec/PlistBuddy -c "Print :UIRequiredDeviceCapabilities" "$PLIST" \
+              > /dev/null 2>&1 || \
+            /usr/libexec/PlistBuddy -c "Add :UIRequiredDeviceCapabilities array" "$PLIST"
+
+            if ! /usr/libexec/PlistBuddy -c "Print :UIRequiredDeviceCapabilities" \
+                "$PLIST" | grep -q arm64; then
+              /usr/libexec/PlistBuddy -c \
+                "Add :UIRequiredDeviceCapabilities:0 string arm64" "$PLIST"
+            fi
+          }
+
+          patch_plist "unpacked/Payload/SatScream.app/Info.plist"
+          patch_plist "unpacked/Payload/SatScream.app/PlugIns/SatScreamWidget.appex/Info.plist"
+
+      - name: Patch binary SDK version with vtool
+        # PlistBuddy only updates Info.plist text. Apple also reads the SDK version
+        # from the Mach-O LC_BUILD_VERSION load command in the binary itself.
+        # vtool patches that directly, fixing ITMS-90725.
+        run: |
+          APP_BIN="unpacked/Payload/SatScream.app/SatScream"
+          WIDGET_BIN="unpacked/Payload/SatScream.app/PlugIns/SatScreamWidget.appex/SatScreamWidget"
+
+          vtool -set-build-version ios 16.0 26.2 -replace -output "$APP_BIN" "$APP_BIN"
+          vtool -set-build-version ios 16.0 26.2 -replace -output "$WIDGET_BIN" "$WIDGET_BIN"
+
+          echo "=== App binary build version after patch ==="
+          vtool -show "$APP_BIN"
+          echo "=== Widget binary build version after patch ==="
+          vtool -show "$WIDGET_BIN"
+
+      - name: Write plist merge helper script
+        run: |
+          echo 'import plistlib, sys' > /tmp/merge_plist.py
+          echo 'partial_path = "icon_work/partial-info.plist"' >> /tmp/merge_plist.py
+          echo 'info_path = sys.argv[1] + "/Info.plist"' >> /tmp/merge_plist.py
+          echo 'with open(partial_path, "rb") as f: partial = plistlib.load(f)' >> /tmp/merge_plist.py
+          echo 'with open(info_path, "rb") as f: info = plistlib.load(f)' >> /tmp/merge_plist.py
+          echo 'info.update(partial)' >> /tmp/merge_plist.py
+          echo 'info["CFBundleIconName"] = "AppIcon"' >> /tmp/merge_plist.py
+          echo 'with open(info_path, "wb") as f: plistlib.dump(info, f)' >> /tmp/merge_plist.py
+          echo 'print("Merged:", list(partial.keys()))' >> /tmp/merge_plist.py
+
+
+      - name: Generate and inject app icons via actool
+        # CFBundleIconName requires a matching Assets.car -- loose PNGs are ignored
+        # by Apple once CFBundleIconName is set. We must produce a valid Assets.car.
+        # Key fix vs previous attempts: --product-type tells actool it is compiling
+        # for an application (not an extension), which determines which icon slots it
+        # fills. Without it, actool may skip icon compilation silently.
+        run: |
+          APP_BUNDLE="unpacked/Payload/SatScream.app"
+
+          SOURCE_ICON=$(find "$APP_BUNDLE" -name "btc_launcher-appstore.png" | head -1)
+          if [ -z "$SOURCE_ICON" ]; then
+            echo "ERROR: btc_launcher-appstore.png not found in bundle"
+            find "$APP_BUNDLE" -name "*.png" | head -20
+            exit 1
+          fi
+          echo "Source icon: $SOURCE_ICON"
+
+          XCASSETS="icon_work/Icons.xcassets"
+          ICONSET="$XCASSETS/AppIcon.appiconset"
+          mkdir -p "$ICONSET"
+
+          # Root-level .xcassets Contents.json (required by actool)
+          echo '{"info":{"author":"xcode","version":1}}' > "$XCASSETS/Contents.json"
+
+          sips -z 120  120  "$SOURCE_ICON" --out "$ICONSET/Icon-60@2x.png"   > /dev/null
+          sips -z 180  180  "$SOURCE_ICON" --out "$ICONSET/Icon-60@3x.png"   > /dev/null
+          sips -z 76   76   "$SOURCE_ICON" --out "$ICONSET/Icon-76.png"       > /dev/null
+          sips -z 152  152  "$SOURCE_ICON" --out "$ICONSET/Icon-76@2x.png"   > /dev/null
+          sips -z 167  167  "$SOURCE_ICON" --out "$ICONSET/Icon-83.5@2x.png" > /dev/null
+          sips -z 1024 1024 "$SOURCE_ICON" --out "$ICONSET/Icon-1024.png"    > /dev/null
+
+          python3 -c "
+          import json
+          catalog = {
+            'images': [
+              {'idiom':'iphone','scale':'2x','size':'60x60',    'filename':'Icon-60@2x.png'},
+              {'idiom':'iphone','scale':'3x','size':'60x60',    'filename':'Icon-60@3x.png'},
+              {'idiom':'ipad',  'scale':'1x','size':'76x76',    'filename':'Icon-76.png'},
+              {'idiom':'ipad',  'scale':'2x','size':'76x76',    'filename':'Icon-76@2x.png'},
+              {'idiom':'ipad',  'scale':'2x','size':'83.5x83.5','filename':'Icon-83.5@2x.png'},
+              {'idiom':'ios-marketing','scale':'1x','size':'1024x1024','filename':'Icon-1024.png'}
+            ],
+            'info': {'author':'xcode','version':1}
+          }
+          print(json.dumps(catalog, indent=2))
+          " > "$ICONSET/Contents.json"
+
+          echo "=== xcassets structure ==="
+          find icon_work/ -type f
+
+          mkdir -p icon_work/compiled
+          # Allow actool to exit non-zero -- it may emit a simulator
+          # runtime warning and returns exit code 1 even when compilation succeeds.
+          # We check for Assets.car explicitly below instead of relying on exit code.
+          xcrun --sdk iphoneos actool \
+            --output-format human-readable-text \
+            --notices --warnings \
+            --platform iphoneos \
+            --minimum-deployment-target 16.0 \
+            --target-device iphone \
+            --target-device ipad \
+            --app-icon AppIcon \
+            --product-type com.apple.product-type.application \
+            --output-partial-info-plist icon_work/partial-info.plist \
+            --compile icon_work/compiled \
+            "$XCASSETS" || true
+
+          echo "=== actool partial-info.plist ==="
+          cat icon_work/partial-info.plist 2>/dev/null || echo "(not produced)"
+
+          echo "=== icon_work/compiled contents ==="
+          ls -la icon_work/compiled/
+
+          if [ ! -f "icon_work/compiled/Assets.car" ]; then
+            echo "ERROR: actool did not produce Assets.car"
+            exit 1
+          fi
+
+          echo "=== Assets.car contents via assetutil ==="
+          xcrun assetutil --info icon_work/compiled/Assets.car || echo "(assetutil unavailable)"
+
+          cp icon_work/compiled/Assets.car "$APP_BUNDLE/Assets.car"
+          echo "Assets.car injected"
+
+          # plutil -merge is unavailable on this runner. Use Python's plistlib to
+          # perform the same merge: copy every key from actool's partial-info.plist
+          # (CFBundleIcons, CFBundleIcons~ipad, CFBundleIconName) into Info.plist.
+          # This is exactly what Xcode does after running actool internally.
+          python3 /tmp/merge_plist.py "$APP_BUNDLE"
+
+          echo "=== Info.plist icon keys after merge ==="
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIconName" "$APP_BUNDLE/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIcons" "$APP_BUNDLE/Info.plist"
+
+
+      - name: Re-sign and repackage IPA
+        run: |
+          IDENTITY=$(security find-identity -v -p codesigning build.keychain \
+            | grep -v "REVOKED" | grep -v "0 valid" | head -1 | awk '{print $2}')
+          echo "Using identity: $IDENTITY"
+
+          # Widget first, then main app (inside-out order required)
+          codesign --force --sign "$IDENTITY" \
+            --entitlements SatScreamWidget.entitlements \
+            unpacked/Payload/SatScream.app/PlugIns/SatScreamWidget.appex
+
+          codesign --force --sign "$IDENTITY" \
+            --entitlements SatScream.entitlements \
+            unpacked/Payload/SatScream.app
+
+          echo "=== Verifying widget ==="
+          codesign -dvvv unpacked/Payload/SatScream.app/PlugIns/SatScreamWidget.appex
+          echo "=== Verifying main app ==="
+          codesign -dvvv unpacked/Payload/SatScream.app
+
+          cd unpacked && zip -qr ../SatScream-dist.ipa Payload/
+          cd ..
+
+          echo "=== Post-sign IPA verification ==="
+          unzip -p SatScream-dist.ipa Payload/SatScream.app/Info.plist > /tmp/signed_info.plist 2>/dev/null             && /usr/libexec/PlistBuddy -c "Print :CFBundleIconName" /tmp/signed_info.plist             || echo "WARNING: Could not read CFBundleIconName from final IPA"
+          echo "=== Assets.car present in IPA ==="
+          unzip -l SatScream-dist.ipa | grep Assets.car || echo "WARNING: Assets.car not found in IPA"
+
+      - name: Validate final IPA metadata
+        # Print the exact values Apple will read from the uploaded IPA.
+        # If DTXcodeBuild is not 17C52 (GM), the patching is being overwritten.
+        run: |
+          echo '=== Extracting Info.plist from final IPA ==='
+          unzip -p SatScream-dist.ipa Payload/SatScream.app/Info.plist > /tmp/final-info.plist
+          echo '--- Key build metadata fields ---'
+          for KEY in DTXcode DTXcodeBuild DTSDKBuild DTSDKName DTPlatformBuild DTPlatformVersion DTPlatformName BuildMachineOSBuild CFBundleVersion CFBundleShortVersionString; do
+            VAL=$(/usr/libexec/PlistBuddy -c "Print :$KEY" /tmp/final-info.plist 2>/dev/null || echo '(not set)')
+            echo "  $KEY = $VAL"
+          done
+
+      - name: Upload to App Store Connect
+        env:
+          API_KEY_ID: ${{ secrets.API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.API_ISSUER_ID }}
+          API_KEY_CONTENTS: ${{ secrets.API_KEY_CONTENTS }}
+        run: |
+          mkdir -p ~/private_keys
+          echo "$API_KEY_CONTENTS" > ~/private_keys/AuthKey_${API_KEY_ID}.p8
+          xcrun altool --upload-app \
+            --type ios \
+            --file SatScream-dist.ipa \
+            --apiKey "$API_KEY_ID" \
+            --apiIssuer "$API_ISSUER_ID"

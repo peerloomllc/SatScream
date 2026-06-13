@@ -1,0 +1,31 @@
+scheme: SatScream
+product: SatScream
+bundleID: com.peerloomllc.satscream
+version: 1
+deploymentTarget: "18.0"
+iconPath: Sources/SatScream/Resources/btc_launcher-appstore.png
+capabilities:
+  - backgroundModes
+  - userNotifications
+  - appGroups
+appGroups:
+  - group.com.peerloomllc.satscream
+infoPlist:
+  UIBackgroundModes:
+    - fetch
+    - remote-notification
+  BGTaskSchedulerPermittedIdentifiers:
+    - com.peerloomllc.satscream.pricerefresh
+  UIApplicationSupportsIndirectInputEvents: true
+  LSApplicationQueriesSchemes:
+    - lightning
+    - bitcoin
+    - lnurl
+extensions:
+  - product: SatScreamWidget
+    bundleID: com.peerloomllc.satscream.widget
+    infoPath: Sources/SatScreamWidget/Info.plist
+    capabilities:
+      - appGroups
+    appGroups:
+      - group.com.peerloomllc.satscream

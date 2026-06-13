@@ -22,5 +22,7 @@ local.properties
 /ios/build
 /ios/DerivedData
 /ios/Pods
+/ios/SatScream/.build
+/ios/SatScream/xtool/*.app
 **/xcuserdata
 **/*.xcuserstate
