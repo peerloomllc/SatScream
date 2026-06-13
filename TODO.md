@@ -36,7 +36,8 @@ Each item: `- [ ] Description` with metadata tags: `[type]` `[complexity]` `[pri
 
 ### iOS
 
-- [ ] Write a local iOS build & release script (run on the mac-mini), mirroring the other PeerLoom apps' local scripts — replaces the removed `upload.yml` CI. `[feature]` `[medium]` `[medium]`
+- [x] Local iOS dev build + install script — `scripts/ios-dev-install.sh` (rsync → xcodegen → xcodebuild over SSH on the Mac mini → devicectl install/launch), mirroring PearCircle. Verified end-to-end on iPhone SE. `[feature]` `[medium]` `[medium]`
+- [ ] Local iOS release/upload script — App Store distribution under team `G79ALD29NA` (archive → export → App Store Connect upload), mirroring PearCircle's `release.sh`; replaces the removed `upload.yml` CI. `[feature]` `[medium]` `[low]`
 
 ### Investigations
 
