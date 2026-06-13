@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import Foundation
 
 // Shared App Group suite name — must match BitcoinViewModel
 private let suiteName = "group.com.peerloomllc.satscream"
@@ -32,6 +33,13 @@ struct PriceProvider: TimelineProvider {
     }
 
     private func makeEntry() -> PriceEntry {
+        // If the shared container URL is nil, the App Group isn't provisioned for this
+        // extension — the widget then can't see the app's data and will render the "—"
+        // placeholder. Log it so the cause is visible in Console during diagnosis.
+        if FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName) == nil {
+            NSLog("[SatScreamWidget] ⚠️ App Group '\(suiteName)' is not provisioned for the widget extension — cannot read shared price data.")
+        }
+
         let defaults = UserDefaults(suiteName: suiteName)
         let price    = Double(defaults?.float(forKey: "LAST_PRICE") ?? 0)
         let isBSM    = defaults?.bool(forKey: "BITCOIN_STANDARD_MODE") ?? false

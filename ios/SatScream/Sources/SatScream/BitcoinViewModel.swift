@@ -45,13 +45,26 @@ class BitcoinViewModel: ObservableObject {
     @Published var dumpAudioName: String? = nil
 
     // MARK: - Private
-    private let defaults = UserDefaults(suiteName: Prefs.suite) ?? .standard
+    private let defaults: UserDefaults
     private var currentPrice: Double? = nil
     private var timer: Timer?
     private var audioPlayer: AVAudioPlayer?
 
     // MARK: - Init
     init() {
+        // Resolve the shared App Group store. UserDefaults(suiteName:) returns a non-nil
+        // instance even when the App Group isn't entitled, so checking it for nil is not a
+        // reliable signal. The shared *container URL* is nil unless the App Group is actually
+        // provisioned — use that. If it's unavailable, the widget (a separate process) cannot
+        // read our data, so fail loudly instead of silently writing to a private store.
+        let groupAvailable = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: Prefs.suite) != nil
+        if let shared = UserDefaults(suiteName: Prefs.suite), groupAvailable {
+            defaults = shared
+        } else {
+            NSLog("[SatScream] ⚠️ App Group '\(Prefs.suite)' is NOT provisioned — the home-screen widget will not receive price updates. Enable the App Group capability on BOTH the app and the widget App IDs and ensure it is in their provisioning profiles.")
+            defaults = .standard
+        }
         loadPreferences()
         startPriceTimer()
     }
