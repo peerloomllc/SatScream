@@ -99,29 +99,29 @@ struct SatScreamWidgetView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor
-            Text(entry.priceText)
+        Text(entry.priceText)
             .font(.system(size: fontSize, weight: .thin, design: .default))
             .foregroundColor(textColor)
             .minimumScaleFactor(0.3)
             .lineLimit(1)
             .padding(10)
-        }
-        .modifier(WidgetBackgroundModifier(color: bgColor))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .widgetBackground(bgColor)
     }
 }
 
 
-// iOS 16/17 compatible background modifier
-private struct WidgetBackgroundModifier: ViewModifier {
-    let color: Color
-
-    func body(content: Content) -> some View {
+// Apply the background full-bleed. This must be applied directly (not wrapped in a
+// custom ViewModifier) so WidgetKit recognizes it as the container background —
+// otherwise iOS draws its own default (slate-gray) background in the bleed area while
+// the app color only fills the inset content, producing the two-tone look.
+private extension View {
+    @ViewBuilder
+    func widgetBackground(_ color: Color) -> some View {
         if #available(iOS 17.0, *) {
-            content.containerBackground(color, for: .widget)
+            containerBackground(color, for: .widget)
         } else {
-            content
+            background(color)
         }
     }
 }
