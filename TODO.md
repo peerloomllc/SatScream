@@ -34,6 +34,10 @@ Each item: `- [ ] Description` with metadata tags: `[type]` `[complexity]` `[pri
 
 - [x] Stop allocating a 400×400 `ARGB_8888` bitmap on every widget update — `BitcoinWidget` now selects a static `res/drawable` shape (`widget_background_light`/`widget_background_dark`, 20dp corners) via `setImageViewResource`. Removes the per-update (~640 KB) allocation. Verified on Pixel 9. `[polish]` `[small]` `[medium]`
 
+### iOS
+
+- [ ] Write a local iOS build & release script (run on the mac-mini), mirroring the other PeerLoom apps' local scripts — replaces the removed `upload.yml` CI. `[feature]` `[medium]` `[medium]`
+
 ### Investigations
 
 - [ ] "iOS widget doesn't work" — the iOS app is now in this repo at `ios/` (consolidated from `peerloomllc/SatScream-iOS`); the widget source is `ios/SatScream/Sources/SatScreamWidget/SatScreamWidget.swift`. Investigate the actual failure (does it not appear in the gallery, stay blank/placeholder, show a stale price, or is the tap/deep-link dead?) — narrow the symptom, then read the widget + its data source. Build/test on the mac-mini + USB iPhone `[bug]` `[medium]` `[medium]`
