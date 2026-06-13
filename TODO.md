@@ -36,4 +36,4 @@ Each item: `- [ ] Description` with metadata tags: `[type]` `[complexity]` `[pri
 
 ### Investigations
 
-- [ ] "iOS widget doesn't work" — there is **no iOS code in this repository** (Android-only; the widget is an `AppWidgetProvider` on `RemoteViews`, which cannot run on iOS). Clarify whether there's a separate iOS project to point at, or whether this is a planned port (would require a from-scratch SwiftUI/WidgetKit app — none of the Kotlin is reusable) `[bug]` `[medium]` `[medium]`
+- [ ] "iOS widget doesn't work" — the iOS app is now in this repo at `ios/` (consolidated from `peerloomllc/SatScream-iOS`); the widget source is `ios/SatScream/Sources/SatScreamWidget/SatScreamWidget.swift`. Investigate the actual failure (does it not appear in the gallery, stay blank/placeholder, show a stale price, or is the tap/deep-link dead?) — narrow the symptom, then read the widget + its data source. Build/test on the mac-mini + USB iPhone `[bug]` `[medium]` `[medium]`
