@@ -1,0 +1,57 @@
+name: SatScream
+options:
+  bundleIdPrefix: com.peerloomllc
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: G79ALD29NA
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1,2"
+
+targets:
+  SatScream:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/SatScream
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.peerloomllc.satscream
+        CODE_SIGN_ENTITLEMENTS: Support/SatScream.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    info:
+      path: Support/Generated/SatScream-Info.plist
+      properties:
+        CFBundleDisplayName: SatScream
+        UILaunchScreen: {}
+        UIBackgroundModes: [fetch, remote-notification]
+        BGTaskSchedulerPermittedIdentifiers: [com.peerloomllc.satscream.pricerefresh]
+        UIApplicationSupportsIndirectInputEvents: true
+        LSApplicationQueriesSchemes: [lightning, bitcoin, lnurl]
+    dependencies:
+      - target: SatScreamWidget
+        embed: true
+
+  SatScreamWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Sources/SatScreamWidget
+        excludes:
+          - Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.peerloomllc.satscream.widget
+        CODE_SIGN_ENTITLEMENTS: Support/SatScreamWidget.entitlements
+    info:
+      path: Support/Generated/SatScreamWidget-Info.plist
+      properties:
+        CFBundleDisplayName: SatScream
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
