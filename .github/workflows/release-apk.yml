@@ -20,7 +20,7 @@ jobs:
       uses: android-actions/setup-android@v3  # Installs SDK tools^3^
 
     - name: Make gradlew executable
-      run: chmod +x ./gradlew
+      run: chmod +x android/gradlew
 
     - name: Decode signing keystore
       run: echo "${{ secrets.ENCODED_KEYSTORE }}" | base64 -d > keystore.jks
@@ -29,6 +29,7 @@ jobs:
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
     - name: Build & sign release APK
+      working-directory: android
       run: ./gradlew assembleRelease
       env:
         SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -37,7 +38,7 @@ jobs:
 
     - name: Verify APK
       run: |
-        zipalign -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
+        zipalign -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
         apksigner verify --print-certs app-release.apk
 
     - name: Upload to Release
