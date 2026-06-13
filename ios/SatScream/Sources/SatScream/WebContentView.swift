@@ -44,7 +44,7 @@ struct LocalWebView: UIViewRepresentable {
         webView.navigationDelegate = context.coordinator
 
         // Load local HTML from bundle (mirrors WebViewActivity loading from assets)
-        if let url = Bundle.module.url(forResource: "use-lightning-network-modified", withExtension: "html") {
+        if let url = Bundle.appResources.url(forResource: "use-lightning-network-modified", withExtension: "html") {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         }
 

@@ -407,7 +407,7 @@ class BitcoinViewModel: ObservableObject {
 
         // Default audio from bundle
         let assetName = isPump ? "pump" : "dump"
-        if let url = Bundle.module.url(forResource: assetName, withExtension: "wav"),
+        if let url = Bundle.appResources.url(forResource: assetName, withExtension: "wav"),
         let player = try? AVAudioPlayer(contentsOf: url) {
             audioPlayer = player
             player.play()

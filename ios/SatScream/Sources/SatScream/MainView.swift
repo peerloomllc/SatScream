@@ -76,7 +76,7 @@ struct MainView: View {
                             .multilineTextAlignment(.center)
 
                             if viewModel.pumpAlertTriggered {
-                                Image("ic_pump_hit_light", bundle: .module)
+                                Image("ic_pump_hit_light", bundle: Bundle.appResources)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 48, height: 48)
@@ -103,7 +103,7 @@ struct MainView: View {
                             .multilineTextAlignment(.center)
 
                             if viewModel.dumpAlertTriggered {
-                                Image("ic_dump_hit_light", bundle: .module)
+                                Image("ic_dump_hit_light", bundle: Bundle.appResources)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 48, height: 48)
