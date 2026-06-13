@@ -40,4 +40,4 @@ Each item: `- [ ] Description` with metadata tags: `[type]` `[complexity]` `[pri
 
 ### Investigations
 
-- [ ] "iOS widget doesn't work" — the iOS app is now in this repo at `ios/` (consolidated from `peerloomllc/SatScream-iOS`); the widget source is `ios/SatScream/Sources/SatScreamWidget/SatScreamWidget.swift`. Investigate the actual failure (does it not appear in the gallery, stay blank/placeholder, show a stale price, or is the tap/deep-link dead?) — narrow the symptom, then read the widget + its data source. Build/test on the mac-mini + USB iPhone `[bug]` `[medium]` `[medium]`
+- [x] "iOS widget doesn't show the price" — root cause: the App Group `group.com.peerloomllc.satscream` was never provisioned (the headless wildcard profile can't carry capabilities), so the widget couldn't read the app's shared container. Fixed by migrating the iOS build to XcodeGen + xcodebuild and signing under team G79ALD29NA with the App Group registered (entitlement now present in both the app and `.appex`). Also fixed alert audio (missing `AVAudioSession`) and the two-tone widget background found during verification. Verified on iPhone SE. `[bug]` `[medium]` `[medium]`
