@@ -21,24 +21,22 @@
         android:contentDescription="@string/back"
         app:tint="@color/text_primary" />
 
-    <!-- Scrollable Content -->
+    <!-- Scrollable Content (top-aligned, not vertically centered) -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:fillViewport="true">
 
-        <!-- Centered Content -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
             android:padding="@dimen/spacing_large">
 
             <!-- Title -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/audio_settings_title"
                 android:textSize="28sp"
@@ -47,25 +45,42 @@
                 android:gravity="center"
                 android:layout_marginBottom="@dimen/spacing_xlarge"/>
 
-            <!-- Pump Alert Audio Section -->
+            <!-- Pump Alert Audio Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/spacing_xlarge"
-                android:paddingStart="@dimen/spacing_large"
-                android:paddingEnd="@dimen/spacing_large">
+                android:background="@drawable/audio_card_bg"
+                android:padding="@dimen/spacing_large"
+                android:layout_marginBottom="@dimen/spacing_large">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Title row: section name + inline preview -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/pump_alert_audio"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_primary"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center"
-                    android:layout_marginBottom="@dimen/spacing_small"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/pump_alert_audio"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_primary"
+                        android:fontFamily="sans-serif-medium"/>
+
+                    <ImageButton
+                        android:id="@+id/btnPlayPumpAudio"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_play"
+                        android:contentDescription="@string/play_audio"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:stateListAnimator="@animator/btn_press_scale"
+                        app:tint="@color/text_secondary" />
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvPumpAudioStatus"
@@ -74,85 +89,70 @@
                     android:text="@string/using_default_audio"
                     android:textSize="14sp"
                     android:textColor="@color/text_secondary"
-                    android:gravity="center"
-                    android:paddingStart="@dimen/spacing_medium"
-                    android:paddingEnd="@dimen/spacing_medium"
+                    android:layout_marginTop="2dp"
                     android:layout_marginBottom="@dimen/spacing_medium"/>
 
-                <LinearLayout
+                <!-- Primary action: choose a custom sound -->
+                <Button
+                    android:id="@+id/btnSelectPumpAudio"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="@string/select_audio"
+                    android:textSize="14sp"
+                    android:textColor="@color/btn_background"
+                    android:backgroundTint="@color/selector_btn_pump"
+                    android:fontFamily="sans-serif-medium"
+                    app:cornerRadius="100dp"
+                    android:stateListAnimator="@animator/btn_press_scale"/>
+
+                <!-- Secondary action: revert to bundled default -->
+                <Button
+                    android:id="@+id/btnResetPumpAudio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <!-- First row: Select and Reset buttons -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:layout_marginBottom="@dimen/spacing_small">
-
-                        <Button
-                            android:id="@+id/btnSelectPumpAudio"
-                            android:layout_width="130dp"
-                            android:layout_height="56dp"
-                            android:text="@string/select_audio"
-                            android:textSize="14sp"
-                            android:textColor="@color/btn_background"
-                            android:backgroundTint="@color/selector_btn_pump"
-                            android:fontFamily="sans-serif-medium"
-                            app:cornerRadius="100dp"
-                            android:stateListAnimator="@animator/btn_press_scale"
-                            android:layout_marginEnd="@dimen/spacing_small"/>
-
-                        <Button
-                            android:id="@+id/btnResetPumpAudio"
-                            android:layout_width="130dp"
-                            android:layout_height="56dp"
-                            android:text="@string/reset_to_default"
-                            android:textSize="14sp"
-                            android:textColor="@color/btn_background"
-                            android:backgroundTint="@color/text_primary"
-                            android:fontFamily="sans-serif-medium"
-                            app:cornerRadius="100dp"
-                            android:stateListAnimator="@animator/btn_press_scale"/>
-
-                    </LinearLayout>
-
-                    <!-- Second row: Play button centered -->
-                    <ImageButton
-                        android:id="@+id/btnPlayPumpAudio"
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        android:src="@drawable/ic_play"
-                        android:contentDescription="@string/play_audio"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:stateListAnimator="@animator/btn_press_scale"
-                        app:tint="@color/text_primary" />
-
-                </LinearLayout>
+                    android:text="@string/reset_to_default"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:fontFamily="sans-serif-medium"
+                    android:stateListAnimator="@animator/btn_press_scale"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
             </LinearLayout>
 
-            <!-- Dump Alert Audio Section -->
+            <!-- Dump Alert Audio Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:paddingStart="@dimen/spacing_large"
-                android:paddingEnd="@dimen/spacing_large">
+                android:background="@drawable/audio_card_bg"
+                android:padding="@dimen/spacing_large">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/dump_alert_audio"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_primary"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center"
-                    android:layout_marginBottom="@dimen/spacing_small"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/dump_alert_audio"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_primary"
+                        android:fontFamily="sans-serif-medium"/>
+
+                    <ImageButton
+                        android:id="@+id/btnPlayDumpAudio"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_play"
+                        android:contentDescription="@string/play_audio"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:stateListAnimator="@animator/btn_press_scale"
+                        app:tint="@color/text_secondary" />
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvDumpAudioStatus"
@@ -161,64 +161,31 @@
                     android:text="@string/using_default_audio"
                     android:textSize="14sp"
                     android:textColor="@color/text_secondary"
-                    android:gravity="center"
-                    android:paddingStart="@dimen/spacing_medium"
-                    android:paddingEnd="@dimen/spacing_medium"
+                    android:layout_marginTop="2dp"
                     android:layout_marginBottom="@dimen/spacing_medium"/>
 
-                <LinearLayout
+                <Button
+                    android:id="@+id/btnSelectDumpAudio"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="@string/select_audio"
+                    android:textSize="14sp"
+                    android:textColor="@color/btn_background"
+                    android:backgroundTint="@color/selector_btn_dump"
+                    android:fontFamily="sans-serif-medium"
+                    app:cornerRadius="100dp"
+                    android:stateListAnimator="@animator/btn_press_scale"/>
+
+                <Button
+                    android:id="@+id/btnResetDumpAudio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <!-- First row: Select and Reset buttons -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:layout_marginBottom="@dimen/spacing_small">
-
-                        <Button
-                            android:id="@+id/btnSelectDumpAudio"
-                            android:layout_width="130dp"
-                            android:layout_height="56dp"
-                            android:text="@string/select_audio"
-                            android:textSize="14sp"
-                            android:textColor="@color/btn_background"
-                            android:backgroundTint="@color/selector_btn_dump"
-                            android:fontFamily="sans-serif-medium"
-                            app:cornerRadius="100dp"
-                            android:stateListAnimator="@animator/btn_press_scale"
-                            android:layout_marginEnd="@dimen/spacing_small"/>
-
-                        <Button
-                            android:id="@+id/btnResetDumpAudio"
-                            android:layout_width="130dp"
-                            android:layout_height="56dp"
-                            android:text="@string/reset_to_default"
-                            android:textSize="14sp"
-                            android:textColor="@color/btn_background"
-                            android:backgroundTint="@color/text_primary"
-                            android:fontFamily="sans-serif-medium"
-                            app:cornerRadius="100dp"
-                            android:stateListAnimator="@animator/btn_press_scale"/>
-
-                    </LinearLayout>
-
-                    <!-- Second row: Play button centered -->
-                    <ImageButton
-                        android:id="@+id/btnPlayDumpAudio"
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        android:src="@drawable/ic_play"
-                        android:contentDescription="@string/play_audio"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:stateListAnimator="@animator/btn_press_scale"
-                        app:tint="@color/text_primary" />
-
-                </LinearLayout>
+                    android:text="@string/reset_to_default"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:fontFamily="sans-serif-medium"
+                    android:stateListAnimator="@animator/btn_press_scale"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
             </LinearLayout>
 
