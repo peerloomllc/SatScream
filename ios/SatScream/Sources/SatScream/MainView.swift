@@ -87,13 +87,7 @@ struct MainView: View {
                             .foregroundColor(colors.textTertiary)
                             .multilineTextAlignment(.center)
 
-                            if viewModel.pumpAlertTriggered {
-                                Image("ic_pump_hit_light", bundle: Bundle.appResources)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 48, height: 48)
-                                .transition(.scale.combined(with: .opacity))
-                            }
+                            alertHitIcon(triggered: viewModel.pumpAlertTriggered, isPump: true)
                         }
                         .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.pumpAlertTriggered)
 
@@ -117,13 +111,7 @@ struct MainView: View {
                             .foregroundColor(colors.textTertiary)
                             .multilineTextAlignment(.center)
 
-                            if viewModel.dumpAlertTriggered {
-                                Image("ic_dump_hit_light", bundle: Bundle.appResources)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 48, height: 48)
-                                .transition(.scale.combined(with: .opacity))
-                            }
+                            alertHitIcon(triggered: viewModel.dumpAlertTriggered, isPump: false)
                         }
                         .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.dumpAlertTriggered)
                     }
@@ -223,6 +211,36 @@ struct MainView: View {
             .environmentObject(viewModel)
             .sheetChrome()
         }
+    }
+
+    // Fixed-height slot for the "alert hit" rocket so toggling its visibility
+    // never reflows the centered content above it. The icon springs in within
+    // the reserved space instead of pushing the buttons up.
+    @ViewBuilder
+    private func alertHitIcon(triggered: Bool, isPump: Bool) -> some View {
+        ZStack {
+            if triggered, let img = Self.hitIcon(isPump: isPump, isDark: viewModel.isDarkMode) {
+                Image(uiImage: img)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 48, height: 48)
+                .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .frame(height: 48)
+    }
+
+    // Loads the rocket variant matching the current theme. The PNGs are opaque
+    // (white bg for light, black bg for dark) so they blend into the app
+    // background. Resolved by file URL — the reliable path for loose bundle
+    // resources (named-image lookup can miss root-level PNGs on device).
+    private static func hitIcon(isPump: Bool, isDark: Bool) -> UIImage? {
+        let name = "ic_\(isPump ? "pump" : "dump")_hit_\(isDark ? "dark" : "light")"
+        if let url = Bundle.appResources.url(forResource: name, withExtension: "png"),
+           let img = UIImage(contentsOfFile: url.path) {
+            return img
+        }
+        return UIImage(named: name, in: Bundle.appResources, compatibleWith: nil)
     }
 
     private func showToast(_ message: String) {
