@@ -16,7 +16,8 @@
         android:layout_marginStart="@dimen/spacing_medium"
         android:layout_marginBottom="@dimen/spacing_small"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:src="@drawable/ic_close"
+        android:stateListAnimator="@animator/btn_press_scale"
         android:contentDescription="@string/back"
         app:tint="@color/text_primary" />
 
@@ -101,7 +102,8 @@
                             android:textColor="@color/btn_background"
                             android:backgroundTint="@color/selector_btn_pump"
                             android:fontFamily="sans-serif-medium"
-                            android:stateListAnimator="@null"
+                            app:cornerRadius="100dp"
+                            android:stateListAnimator="@animator/btn_press_scale"
                             android:layout_marginEnd="@dimen/spacing_small"/>
 
                         <Button
@@ -113,7 +115,8 @@
                             android:textColor="@color/btn_background"
                             android:backgroundTint="@color/text_primary"
                             android:fontFamily="sans-serif-medium"
-                            android:stateListAnimator="@null"/>
+                            app:cornerRadius="100dp"
+                            android:stateListAnimator="@animator/btn_press_scale"/>
 
                     </LinearLayout>
 
@@ -122,9 +125,10 @@
                         android:id="@+id/btnPlayPumpAudio"
                         android:layout_width="56dp"
                         android:layout_height="56dp"
-                        android:src="@android:drawable/ic_media_play"
+                        android:src="@drawable/ic_play"
                         android:contentDescription="@string/play_audio"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:stateListAnimator="@animator/btn_press_scale"
                         app:tint="@color/text_primary" />
 
                 </LinearLayout>
@@ -185,7 +189,8 @@
                             android:textColor="@color/btn_background"
                             android:backgroundTint="@color/selector_btn_dump"
                             android:fontFamily="sans-serif-medium"
-                            android:stateListAnimator="@null"
+                            app:cornerRadius="100dp"
+                            android:stateListAnimator="@animator/btn_press_scale"
                             android:layout_marginEnd="@dimen/spacing_small"/>
 
                         <Button
@@ -197,7 +202,8 @@
                             android:textColor="@color/btn_background"
                             android:backgroundTint="@color/text_primary"
                             android:fontFamily="sans-serif-medium"
-                            android:stateListAnimator="@null"/>
+                            app:cornerRadius="100dp"
+                            android:stateListAnimator="@animator/btn_press_scale"/>
 
                     </LinearLayout>
 
@@ -206,9 +212,10 @@
                         android:id="@+id/btnPlayDumpAudio"
                         android:layout_width="56dp"
                         android:layout_height="56dp"
-                        android:src="@android:drawable/ic_media_play"
+                        android:src="@drawable/ic_play"
                         android:contentDescription="@string/play_audio"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:stateListAnimator="@animator/btn_press_scale"
                         app:tint="@color/text_primary" />
 
                 </LinearLayout>

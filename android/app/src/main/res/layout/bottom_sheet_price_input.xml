@@ -74,6 +74,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -92,6 +94,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -110,6 +114,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <!-- Row 2: 4, 5, 6 -->
@@ -129,6 +135,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -147,6 +155,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -165,6 +175,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <!-- Row 3: 7, 8, 9 -->
@@ -184,6 +196,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -202,6 +216,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -220,6 +236,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <!-- Row 4: Clear, 0, Backspace -->
@@ -239,6 +257,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -257,6 +277,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -275,6 +297,8 @@
                 android:minWidth="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
         </GridLayout>
@@ -296,6 +320,8 @@
                 android:fontFamily="sans-serif-medium"
                 android:backgroundTint="@color/input_field_surface"
                 android:layout_marginEnd="8dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 style="?attr/materialButtonOutlinedStyle"/>
 
             <Button
@@ -308,7 +334,9 @@
                 android:textColor="@color/btn_background"
                 android:fontFamily="sans-serif-medium"
                 android:backgroundTint="@color/text_primary"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="8dp"
+                app:cornerRadius="100dp"
+                android:stateListAnimator="@animator/btn_press_scale"/>
 
         </LinearLayout>
 

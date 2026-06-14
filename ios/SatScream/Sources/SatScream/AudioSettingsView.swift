@@ -31,6 +31,7 @@ struct AudioSettingsView: View {
                         .foregroundColor(colors.textPrimary)
                         .frame(width: 48, height: 48)
                     }
+                    .buttonStyle(PressableButtonStyle())
                     .padding(.leading, 16)
                     .padding(.top, 16)
                     Spacer()
@@ -114,8 +115,9 @@ struct AudioSettingsView: View {
                     .foregroundColor(colors.btnText)
                     .frame(width: 130, height: 56)
                     .background(isPump ? colors.btnPump : colors.btnDump)
-                    .cornerRadius(8)
+                    .clipShape(Capsule())
                 }
+                .buttonStyle(PressableButtonStyle())
 
                 Button {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -127,8 +129,9 @@ struct AudioSettingsView: View {
                     .foregroundColor(colors.btnText)
                     .frame(width: 130, height: 56)
                     .background(colors.textPrimary)
-                    .cornerRadius(8)
+                    .clipShape(Capsule())
                 }
+                .buttonStyle(PressableButtonStyle())
             }
 
             Button {
@@ -139,6 +142,7 @@ struct AudioSettingsView: View {
                 .foregroundColor(colors.textPrimary)
                 .frame(width: 56, height: 56)
             }
+            .buttonStyle(PressableButtonStyle())
         }
     }
 
