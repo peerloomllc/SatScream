@@ -33,6 +33,11 @@ class BitcoinViewModel: ObservableObject {
     // MARK: - Published State
     @Published var formattedPrice: String = "Loading…"
     @Published var lastUpdatedText: String = "Last updated: —"
+
+    // Direction of the latest real price tick (USD), briefly non-`.none` so the UI
+    // can flash green/red. Always reflects BTC price movement, even in sats mode.
+    enum PriceDirection { case none, up, down }
+    @Published var priceDirection: PriceDirection = .none
     @Published var isDarkMode: Bool = false
     @Published var isBitcoinStandardMode: Bool = false
 
@@ -140,7 +145,17 @@ class BitcoinViewModel: ObservableObject {
     }
 
     private func handlePriceUpdate(_ price: Double) async {
+        let previousPrice = currentPrice
         currentPrice = price
+
+        // Flash the hero price green/red on a real change, then settle back.
+        if let prev = previousPrice, price != prev {
+            priceDirection = price > prev ? .up : .down
+            Task { [weak self] in
+                try? await Task.sleep(nanoseconds: 700_000_000)
+                self?.priceDirection = .none
+            }
+        }
 
         // Save to UserDefaults
         let timeStr = "Last updated: \(formatTime(Date()))"

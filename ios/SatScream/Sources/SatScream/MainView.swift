@@ -10,6 +10,14 @@ struct MainView: View {
 
     private var colors: AppColors { AppColors(isDark: viewModel.isDarkMode) }
 
+    private var priceColor: Color {
+        switch viewModel.priceDirection {
+        case .up:   return colors.priceUp
+        case .down: return colors.priceDown
+        case .none: return colors.textPrimary
+        }
+    }
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -22,10 +30,13 @@ struct MainView: View {
                     // Hero price display — tap to toggle Bitcoin Standard Mode
                     Text(viewModel.formattedPrice)
                     .font(.system(size: 64, weight: .thin))
-                    .foregroundColor(colors.textPrimary)
+                    .foregroundColor(priceColor)
+                    .contentTransition(.numericText())
                     .minimumScaleFactor(0.4)
                     .lineLimit(1)
                     .padding(.horizontal, 16)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.formattedPrice)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.priceDirection)
                     .onTapGesture {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         viewModel.toggleBitcoinStandardMode()
@@ -69,19 +80,16 @@ struct MainView: View {
                                 .background(colors.btnPump)
                                 .cornerRadius(8)
                             }
+                            .buttonStyle(PressableButtonStyle())
 
                             Text(viewModel.pumpAlertStatus)
                             .font(.system(size: 10))
                             .foregroundColor(colors.textTertiary)
                             .multilineTextAlignment(.center)
 
-                            if viewModel.pumpAlertTriggered {
-                                Image("ic_pump_hit_light", bundle: Bundle.appResources)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 48, height: 48)
-                            }
+                            alertHitIcon(triggered: viewModel.pumpAlertTriggered, isPump: true)
                         }
+                        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.pumpAlertTriggered)
 
                         // Dump column
                         VStack(spacing: 8) {
@@ -96,19 +104,16 @@ struct MainView: View {
                                 .background(colors.btnDump)
                                 .cornerRadius(8)
                             }
+                            .buttonStyle(PressableButtonStyle())
 
                             Text(viewModel.dumpAlertStatus)
                             .font(.system(size: 10))
                             .foregroundColor(colors.textTertiary)
                             .multilineTextAlignment(.center)
 
-                            if viewModel.dumpAlertTriggered {
-                                Image("ic_dump_hit_light", bundle: Bundle.appResources)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 48, height: 48)
-                            }
+                            alertHitIcon(triggered: viewModel.dumpAlertTriggered, isPump: false)
                         }
+                        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.dumpAlertTriggered)
                     }
                     .padding(.horizontal, 24)
 
@@ -136,6 +141,7 @@ struct MainView: View {
                                 .foregroundColor(colors.textSecondary)
                                 .frame(width: 48, height: 48)
                             }
+                            .buttonStyle(PressableButtonStyle())
                             .padding(.leading, 24)
 
                             Spacer()
@@ -189,10 +195,12 @@ struct MainView: View {
         .sheet(isPresented: $showPumpSheet) {
             PriceInputSheet(isPump: true)
             .environmentObject(viewModel)
+            .sheetChrome()
         }
         .sheet(isPresented: $showDumpSheet) {
             PriceInputSheet(isPump: false)
             .environmentObject(viewModel)
+            .sheetChrome()
         }
         .sheet(isPresented: $showAbout) {
             AboutView()
@@ -201,7 +209,38 @@ struct MainView: View {
         .sheet(isPresented: $showAudio) {
             AudioSettingsView()
             .environmentObject(viewModel)
+            .sheetChrome()
         }
+    }
+
+    // Fixed-height slot for the "alert hit" rocket so toggling its visibility
+    // never reflows the centered content above it. The icon springs in within
+    // the reserved space instead of pushing the buttons up.
+    @ViewBuilder
+    private func alertHitIcon(triggered: Bool, isPump: Bool) -> some View {
+        ZStack {
+            if triggered, let img = Self.hitIcon(isPump: isPump, isDark: viewModel.isDarkMode) {
+                Image(uiImage: img)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 48, height: 48)
+                .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .frame(height: 48)
+    }
+
+    // Loads the rocket variant matching the current theme. The PNGs are opaque
+    // (white bg for light, black bg for dark) so they blend into the app
+    // background. Resolved by file URL — the reliable path for loose bundle
+    // resources (named-image lookup can miss root-level PNGs on device).
+    private static func hitIcon(isPump: Bool, isDark: Bool) -> UIImage? {
+        let name = "ic_\(isPump ? "pump" : "dump")_hit_\(isDark ? "dark" : "light")"
+        if let url = Bundle.appResources.url(forResource: name, withExtension: "png"),
+           let img = UIImage(contentsOfFile: url.path) {
+            return img
+        }
+        return UIImage(named: name, in: Bundle.appResources, compatibleWith: nil)
     }
 
     private func showToast(_ message: String) {
