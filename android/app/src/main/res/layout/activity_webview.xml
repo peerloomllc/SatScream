@@ -15,7 +15,8 @@
         android:layout_marginStart="@dimen/spacing_medium"
         android:layout_marginBottom="@dimen/spacing_small"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:src="@drawable/ic_close"
+        android:stateListAnimator="@animator/btn_press_scale"
         android:contentDescription="@string/back"
         app:tint="@color/text_primary" />
 
