@@ -4,7 +4,6 @@ struct MainView: View {
     @EnvironmentObject var viewModel: BitcoinViewModel
     @State private var showPumpSheet = false
     @State private var showDumpSheet = false
-    @State private var showAbout      = false
     @State private var showAudio      = false
     @State private var toastMessage: String? = nil
 
@@ -119,7 +118,7 @@ struct MainView: View {
                 }
                 .frame(width: geo.size.width)
 
-                // Bottom bar: audio | dark mode toggle | info
+                // Bottom bar: audio | dark mode toggle
                 VStack {
                     Spacer()
                     ZStack {
@@ -154,15 +153,11 @@ struct MainView: View {
 
                             Spacer()
 
-                            Button {
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                showAbout = true
-                            } label: {
-                                Image(systemName: "info.circle")
-                                .foregroundColor(colors.textSecondary)
+                            // Info/About button hidden (links to a page with a donate button).
+                            // Invisible placeholder keeps the Dark Mode toggle centered.
+                            Color.clear
                                 .frame(width: 48, height: 48)
-                            }
-                            .padding(.trailing, 24)
+                                .padding(.trailing, 24)
                         }
                     }
                     .frame(height: 64)
@@ -192,10 +187,6 @@ struct MainView: View {
         }
         .sheet(isPresented: $showDumpSheet) {
             PriceInputSheet(isPump: false)
-            .environmentObject(viewModel)
-        }
-        .sheet(isPresented: $showAbout) {
-            AboutView()
             .environmentObject(viewModel)
         }
         .sheet(isPresented: $showAudio) {
