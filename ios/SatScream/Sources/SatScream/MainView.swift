@@ -137,7 +137,11 @@ struct MainView: View {
                         .frame(height: 64)
                         .shadow(color: colors.divider, radius: 1, y: -1)
 
+                        // Two icons, evenly distributed (Info/About button removed —
+                        // it linked to a page with a donate button).
                         HStack {
+                            Spacer()
+
                             Button {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 showAudio = true
@@ -147,7 +151,6 @@ struct MainView: View {
                                 .frame(width: 48, height: 48)
                             }
                             .buttonStyle(PressableButtonStyle())
-                            .padding(.leading, 24)
 
                             Spacer()
 
@@ -166,12 +169,6 @@ struct MainView: View {
                             .buttonStyle(PressableButtonStyle())
 
                             Spacer()
-
-                            // Info/About button hidden (links to a page with a donate button).
-                            // Invisible placeholder keeps the Dark Mode toggle centered.
-                            Color.clear
-                                .frame(width: 48, height: 48)
-                                .padding(.trailing, 24)
                         }
                     }
                     .frame(height: 64)
