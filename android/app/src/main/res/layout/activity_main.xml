@@ -93,6 +93,7 @@
                         android:textColor="@color/btn_background"
                         android:fontFamily="sans-serif-medium"
                         android:minHeight="@dimen/min_touch_target"
+                        app:cornerRadius="100dp"
                         android:stateListAnimator="@animator/btn_press_scale"
                         android:layout_marginBottom="@dimen/spacing_small" />
 
@@ -136,6 +137,7 @@
                         android:textColor="@color/btn_background"
                         android:fontFamily="sans-serif-medium"
                         android:minHeight="@dimen/min_touch_target"
+                        app:cornerRadius="100dp"
                         android:stateListAnimator="@animator/btn_press_scale"
                         android:layout_marginBottom="@dimen/spacing_small"/>
 

@@ -77,7 +77,7 @@ struct MainView: View {
                                 .foregroundColor(colors.btnText)
                                 .frame(maxWidth: .infinity, minHeight: 48)
                                 .background(colors.btnPump)
-                                .cornerRadius(8)
+                                .clipShape(Capsule())
                             }
                             .buttonStyle(PressableButtonStyle())
 
@@ -101,7 +101,7 @@ struct MainView: View {
                                 .foregroundColor(colors.btnText)
                                 .frame(maxWidth: .infinity, minHeight: 48)
                                 .background(colors.btnDump)
-                                .cornerRadius(8)
+                                .clipShape(Capsule())
                             }
                             .buttonStyle(PressableButtonStyle())
 
