@@ -38,4 +38,39 @@ struct AppColors {
     var btnPump:       Color { isDark ? Color(hex: 0xE0E0E0) : Color(hex: 0x808080) }
     var btnDump:       Color { isDark ? Color(hex: 0xE0E0E0) : Color(hex: 0x808080) }
     var inputSurface:  Color { isDark ? Color(hex: 0xFFFFFF, opacity: 0.12) : Color(hex: 0x000000, opacity: 0.12) }
+
+    // Transient tint flashed on the hero price when it ticks up/down.
+    var priceUp:       Color { isDark ? Color(hex: 0x32D74B) : Color(hex: 0x16C784) }
+    var priceDown:     Color { isDark ? Color(hex: 0xFF453A) : Color(hex: 0xEA3943) }
+}
+
+// CashApp-style press feedback: the label springs down slightly while held.
+// Reused by every tappable control so the whole app feels consistent.
+struct PressableButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
+// Modern rounded-card sheet chrome. presentationCornerRadius needs iOS 16.4,
+// but the deployment target is 16.0, so apply it only where available.
+struct SheetChrome: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 16.4, *) {
+            content
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(28)
+        } else {
+            content
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
+    }
+}
+
+extension View {
+    func sheetChrome() -> some View { modifier(SheetChrome()) }
 }

@@ -10,6 +10,14 @@ struct MainView: View {
 
     private var colors: AppColors { AppColors(isDark: viewModel.isDarkMode) }
 
+    private var priceColor: Color {
+        switch viewModel.priceDirection {
+        case .up:   return colors.priceUp
+        case .down: return colors.priceDown
+        case .none: return colors.textPrimary
+        }
+    }
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -22,10 +30,13 @@ struct MainView: View {
                     // Hero price display — tap to toggle Bitcoin Standard Mode
                     Text(viewModel.formattedPrice)
                     .font(.system(size: 64, weight: .thin))
-                    .foregroundColor(colors.textPrimary)
+                    .foregroundColor(priceColor)
+                    .contentTransition(.numericText())
                     .minimumScaleFactor(0.4)
                     .lineLimit(1)
                     .padding(.horizontal, 16)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.formattedPrice)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.priceDirection)
                     .onTapGesture {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         viewModel.toggleBitcoinStandardMode()
@@ -69,6 +80,7 @@ struct MainView: View {
                                 .background(colors.btnPump)
                                 .cornerRadius(8)
                             }
+                            .buttonStyle(PressableButtonStyle())
 
                             Text(viewModel.pumpAlertStatus)
                             .font(.system(size: 10))
@@ -80,8 +92,10 @@ struct MainView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 48, height: 48)
+                                .transition(.scale.combined(with: .opacity))
                             }
                         }
+                        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.pumpAlertTriggered)
 
                         // Dump column
                         VStack(spacing: 8) {
@@ -96,6 +110,7 @@ struct MainView: View {
                                 .background(colors.btnDump)
                                 .cornerRadius(8)
                             }
+                            .buttonStyle(PressableButtonStyle())
 
                             Text(viewModel.dumpAlertStatus)
                             .font(.system(size: 10))
@@ -107,8 +122,10 @@ struct MainView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 48, height: 48)
+                                .transition(.scale.combined(with: .opacity))
                             }
                         }
+                        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.dumpAlertTriggered)
                     }
                     .padding(.horizontal, 24)
 
@@ -136,6 +153,7 @@ struct MainView: View {
                                 .foregroundColor(colors.textSecondary)
                                 .frame(width: 48, height: 48)
                             }
+                            .buttonStyle(PressableButtonStyle())
                             .padding(.leading, 24)
 
                             Spacer()
@@ -189,10 +207,12 @@ struct MainView: View {
         .sheet(isPresented: $showPumpSheet) {
             PriceInputSheet(isPump: true)
             .environmentObject(viewModel)
+            .sheetChrome()
         }
         .sheet(isPresented: $showDumpSheet) {
             PriceInputSheet(isPump: false)
             .environmentObject(viewModel)
+            .sheetChrome()
         }
         .sheet(isPresented: $showAbout) {
             AboutView()
@@ -201,6 +221,7 @@ struct MainView: View {
         .sheet(isPresented: $showAudio) {
             AudioSettingsView()
             .environmentObject(viewModel)
+            .sheetChrome()
         }
     }
 
