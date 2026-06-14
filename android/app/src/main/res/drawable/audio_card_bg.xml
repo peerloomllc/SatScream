@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Subtle rounded surface for each Audio Settings section card. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/input_field_surface" />
+    <corners android:radius="20dp" />
+</shape>

@@ -64,7 +64,7 @@
     <string name="dump_alert_audio">Dump Alert Audio</string>
     <string name="select_audio">Select Audio</string>
     <string name="play_audio">Play</string>
-    <string name="reset_to_default">Use Default</string>
+    <string name="reset_to_default">Reset to default</string>
     <string name="using_default_audio">Using default audio</string>
 
     <!-- Numpad Numbers -->

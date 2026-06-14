@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
+import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -19,8 +20,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.switchmaterial.SwitchMaterial
 import java.text.SimpleDateFormat
 import java.util.Locale
 import androidx.core.content.edit
@@ -29,7 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tvPrice: TextView
     private lateinit var tvLastUpdated: TextView
-    private lateinit var switchDarkMode: SwitchMaterial
+    private lateinit var btnDarkMode: ImageButton
 
     // Alert buttons
     private lateinit var btnSetPumpAlert: Button
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         // Initialize all views
         tvPrice = findViewById(R.id.tvPrice)
         tvLastUpdated = findViewById(R.id.tvLastUpdated)
-        switchDarkMode = findViewById(R.id.switchDarkMode)
+        btnDarkMode = findViewById(R.id.btnDarkMode)
 
         btnSetPumpAlert = findViewById(R.id.btnSetPumpAlert)
         tvPumpAlertStatus = findViewById(R.id.tvPumpAlertStatus)
@@ -146,29 +147,25 @@ class MainActivity : AppCompatActivity() {
     private fun setupDarkModeToggle(isDarkMode: Boolean) {
         val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
 
-        // Set initial state WITHOUT triggering listener
-        switchDarkMode.setOnCheckedChangeListener(null)
-        switchDarkMode.isChecked = isDarkMode
+        // Icon shows the current theme (moon when dark, sun when light); tap flips it.
+        btnDarkMode.setImageResource(if (isDarkMode) R.drawable.ic_moon else R.drawable.ic_sun)
 
-        // Now set the listener
-        switchDarkMode.setOnCheckedChangeListener { view, isChecked ->
-            // Only proceed if the value actually changed (prevents recreation loop)
-            if (isChecked != isDarkMode) {
-                // Haptic feedback
-                view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+        btnDarkMode.setOnClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val newMode = !isDarkMode
 
-                // Save preference
-                sharedPrefs.edit { putBoolean(Prefs.DARK_MODE, isChecked) }
+            // Save preference
+            sharedPrefs.edit { putBoolean(Prefs.DARK_MODE, newMode) }
 
-                // Update widget with new theme
-                BitcoinWidget.updateAllWidgets(this)
+            // Update widget with new theme
+            BitcoinWidget.updateAllWidgets(this)
 
-                // Apply new mode (recreates activity)
-                AppCompatDelegate.setDefaultNightMode(
-                    if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                    else AppCompatDelegate.MODE_NIGHT_NO
-                )
-            }
+            // Apply new mode (recreates activity; onCreate re-reads the pref and
+            // refreshes the icon).
+            AppCompatDelegate.setDefaultNightMode(
+                if (newMode) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
         }
     }
 
@@ -276,7 +273,9 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("SetTextI18n", "InflateParams")
     private fun showPriceInputBottomSheet(isPump: Boolean) {
-        val bottomSheetDialog = BottomSheetDialog(this)
+        // Custom theme rounds + colors the sheet's own surface (see themes.xml), so
+        // no secondary background peeks out behind the rounded corners.
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.Theme_SatScream_BottomSheetDialog)
         val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_price_input, null)
         bottomSheetDialog.setContentView(bottomSheetView)
 
@@ -439,13 +438,41 @@ class MainActivity : AppCompatActivity() {
         val lastUpdateTime = sharedPrefs.getString(Prefs.LAST_UPDATE_TIME, null)
 
         if (lastPrice > 0f) {
-            currentPrice = lastPrice.toDouble()
-            updatePriceDisplay(currentPrice!!)
+            // Capture the previous price before updatePriceDisplay overwrites it, so we
+            // only flash on a genuine price change (not on alert-flag writes or resume).
+            val previousPrice = currentPrice
+            val newPrice = lastPrice.toDouble()
+
+            updatePriceDisplay(newPrice)
             tvLastUpdated.text = lastUpdateTime ?: "Waiting for update..."
+
+            if (previousPrice != null && newPrice != previousPrice) {
+                flashPrice(up = newPrice > previousPrice)
+            }
 
             // Update alert status displays based on triggered state
             updateAlertStatusDisplays()
         }
+    }
+
+    // Briefly tints the hero price green/red and gives it a small spring pulse on each
+    // real tick. Always reflects BTC (USD) direction, even in Bitcoin Standard mode.
+    private fun flashPrice(up: Boolean) {
+        val flashColor = ContextCompat.getColor(this, if (up) R.color.price_up else R.color.price_down)
+        val baseColor = ContextCompat.getColor(this, R.color.text_primary)
+
+        tvPrice.animate().cancel()
+        tvPrice.setTextColor(flashColor)
+        tvPrice.scaleX = 1f
+        tvPrice.scaleY = 1f
+        tvPrice.animate()
+            .scaleX(1.06f).scaleY(1.06f)
+            .setDuration(120)
+            .withEndAction {
+                tvPrice.animate().scaleX(1f).scaleY(1f).setDuration(180).start()
+            }
+            .start()
+        tvPrice.postDelayed({ tvPrice.setTextColor(baseColor) }, 600)
     }
 
     @SuppressLint("SetTextI18n")
@@ -533,8 +560,20 @@ class MainActivity : AppCompatActivity() {
                 BtcPrice.formatUsd(lastPrice.toDouble())
             }
             statusView.text = "${label.uppercase(Locale.US)} HIT: $priceText"
+            val wasVisible = iconView.visibility == View.VISIBLE
             iconView.setImageResource(hitIcon)
             iconView.visibility = View.VISIBLE
+            // Spring the icon in only on the transition into the HIT state.
+            if (!wasVisible) {
+                iconView.animate().cancel()
+                iconView.scaleX = 0f
+                iconView.scaleY = 0f
+                iconView.animate()
+                    .scaleX(1f).scaleY(1f)
+                    .setInterpolator(OvershootInterpolator())
+                    .setDuration(420)
+                    .start()
+            }
         } else {
             statusView.text = "$label alert: ${formatAlertTarget(target, wasSetInBitcoinMode)}"
             iconView.visibility = View.INVISIBLE

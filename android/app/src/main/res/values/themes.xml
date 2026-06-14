@@ -15,4 +15,23 @@
         <item name="colorOnSurface">@color/text_primary</item>
     </style>
 
+    <!-- Bottom sheet dialog: round + color the sheet's OWN surface so there's no
+         secondary background peeking out behind a layered rounded drawable. -->
+    <style name="Theme.SatScream.BottomSheetDialog" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/SatScream.BottomSheet.Modal</item>
+    </style>
+
+    <style name="SatScream.BottomSheet.Modal" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/background_main</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.SatScream.BottomSheet</item>
+    </style>
+
+    <style name="ShapeAppearance.SatScream.BottomSheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
 </resources>

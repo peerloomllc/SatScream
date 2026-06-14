@@ -77,7 +77,7 @@ struct MainView: View {
                                 .foregroundColor(colors.btnText)
                                 .frame(maxWidth: .infinity, minHeight: 48)
                                 .background(colors.btnPump)
-                                .cornerRadius(8)
+                                .clipShape(Capsule())
                             }
                             .buttonStyle(PressableButtonStyle())
 
@@ -101,7 +101,7 @@ struct MainView: View {
                                 .foregroundColor(colors.btnText)
                                 .frame(maxWidth: .infinity, minHeight: 48)
                                 .background(colors.btnDump)
-                                .cornerRadius(8)
+                                .clipShape(Capsule())
                             }
                             .buttonStyle(PressableButtonStyle())
 
@@ -131,39 +131,38 @@ struct MainView: View {
                         .frame(height: 64)
                         .shadow(color: colors.divider, radius: 1, y: -1)
 
+                        // Two icons, evenly distributed (Info/About button removed —
+                        // it linked to a page with a donate button).
                         HStack {
+                            Spacer()
+
                             Button {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 showAudio = true
                             } label: {
-                                Image(systemName: "speaker.wave.2")
+                                Image(systemName: "bell.badge")
                                 .foregroundColor(colors.textSecondary)
                                 .frame(width: 48, height: 48)
                             }
                             .buttonStyle(PressableButtonStyle())
-                            .padding(.leading, 24)
 
                             Spacer()
 
-                            HStack(spacing: 8) {
-                                Text("Dark Mode")
-                                .font(.system(size: 10))
+                            // Dark-mode toggle as a single sun/moon icon (shows the
+                            // current theme; tap flips it).
+                            Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                viewModel.toggleDarkMode(!viewModel.isDarkMode)
+                            } label: {
+                                Image(systemName: viewModel.isDarkMode ? "moon.stars" : "sun.max")
                                 .foregroundColor(colors.textSecondary)
-                                Toggle("", isOn: Binding(
-                                    get: { viewModel.isDarkMode },
-                                    set: { viewModel.toggleDarkMode($0) }
-                                ))
-                                .labelsHidden()
-                                .tint(Color(hex: 0x4F4F4F))
+                                .frame(width: 48, height: 48)
+                                .symbolReplaceTransition()
+                                .animation(.easeInOut(duration: 0.25), value: viewModel.isDarkMode)
                             }
+                            .buttonStyle(PressableButtonStyle())
 
                             Spacer()
-
-                            // Info/About button hidden (links to a page with a donate button).
-                            // Invisible placeholder keeps the Dark Mode toggle centered.
-                            Color.clear
-                                .frame(width: 48, height: 48)
-                                .padding(.trailing, 24)
                         }
                     }
                     .frame(height: 64)

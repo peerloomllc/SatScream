@@ -31,6 +31,7 @@ struct AudioSettingsView: View {
                         .foregroundColor(colors.textPrimary)
                         .frame(width: 48, height: 48)
                     }
+                    .buttonStyle(PressableButtonStyle())
                     .padding(.leading, 16)
                     .padding(.top, 16)
                     Spacer()
@@ -92,54 +93,61 @@ struct AudioSettingsView: View {
 
     @ViewBuilder
     private func audioSection(title: String, statusText: String, isPump: Bool) -> some View {
-        VStack(spacing: 8) {
-            Text(title)
-            .font(.system(size: 20, weight: .medium))
-            .foregroundColor(colors.textPrimary)
+        VStack(alignment: .leading, spacing: 12) {
+            // Title row: section name + inline preview
+            HStack {
+                Text(title)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(colors.textPrimary)
+
+                Spacer()
+
+                Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    viewModel.playAlertSound(isPump: isPump)
+                } label: {
+                    Image(systemName: "play.fill")
+                    .foregroundColor(colors.textSecondary)
+                    .frame(width: 40, height: 40)
+                }
+                .buttonStyle(PressableButtonStyle())
+            }
 
             Text(statusText)
             .font(.system(size: 14))
             .foregroundColor(colors.textSecondary)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 16)
 
-            HStack(spacing: 12) {
-                Button {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    pickingForPump = isPump
-                    showPicker = true
-                } label: {
-                    Text("Select Audio")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(colors.btnText)
-                    .frame(width: 130, height: 56)
-                    .background(isPump ? colors.btnPump : colors.btnDump)
-                    .cornerRadius(8)
-                }
-
-                Button {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    viewModel.resetCustomAudio(isPump: isPump)
-                    showToast(isPump ? "Reset to default pump audio" : "Reset to default dump audio")
-                } label: {
-                    Text("Use Default")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(colors.btnText)
-                    .frame(width: 130, height: 56)
-                    .background(colors.textPrimary)
-                    .cornerRadius(8)
-                }
-            }
-
+            // Primary action: choose a custom sound
             Button {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                viewModel.playAlertSound(isPump: isPump)
+                pickingForPump = isPump
+                showPicker = true
             } label: {
-                Image(systemName: "play.fill")
-                .foregroundColor(colors.textPrimary)
-                .frame(width: 56, height: 56)
+                Text("Select Audio")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(colors.btnText)
+                .frame(maxWidth: .infinity, minHeight: 52)
+                .background(isPump ? colors.btnPump : colors.btnDump)
+                .clipShape(Capsule())
             }
+            .buttonStyle(PressableButtonStyle())
+
+            // Secondary action: revert to bundled default
+            Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                viewModel.resetCustomAudio(isPump: isPump)
+                showToast(isPump ? "Reset to default pump audio" : "Reset to default dump audio")
+            } label: {
+                Text("Reset to default")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(colors.textSecondary)
+                .frame(maxWidth: .infinity, minHeight: 36)
+            }
+            .buttonStyle(PressableButtonStyle())
         }
+        .padding(20)
+        .background(colors.inputSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 
     private func handleFilePick(result: Result<[URL], Error>, isPump: Bool) {

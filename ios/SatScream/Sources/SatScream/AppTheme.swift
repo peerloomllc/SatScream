@@ -73,4 +73,15 @@ struct SheetChrome: ViewModifier {
 
 extension View {
     func sheetChrome() -> some View { modifier(SheetChrome()) }
+
+    // Morphs between two SF Symbols when the symbol name changes (e.g. sun ↔ moon).
+    // The symbol-replace content transition is iOS 17+, so it's a no-op below that.
+    @ViewBuilder
+    func symbolReplaceTransition() -> some View {
+        if #available(iOS 17.0, *) {
+            self.contentTransition(.symbolEffect(.replace))
+        } else {
+            self
+        }
+    }
 }

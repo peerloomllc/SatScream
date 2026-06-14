@@ -49,9 +49,10 @@ struct PriceInputSheet: View {
                         .foregroundColor(colors.textPrimary)
                         .frame(maxWidth: .infinity, minHeight: 48)
                         .background(colors.inputSurface)
-                        .cornerRadius(8)
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(colors.textPrimary.opacity(0.3), lineWidth: 1))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(colors.textPrimary.opacity(0.3), lineWidth: 1))
                     }
+                    .buttonStyle(PressableButtonStyle())
 
                     Button {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -62,8 +63,9 @@ struct PriceInputSheet: View {
                         .foregroundColor(colors.btnText)
                         .frame(maxWidth: .infinity, minHeight: 48)
                         .background(colors.textPrimary)
-                        .cornerRadius(8)
+                        .clipShape(Capsule())
                     }
+                    .buttonStyle(PressableButtonStyle())
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
@@ -110,9 +112,10 @@ struct PriceInputSheet: View {
                             .foregroundColor(colors.textPrimary)
                             .frame(maxWidth: .infinity, minHeight: 64)
                             .background(colors.inputSurface)
-                            .cornerRadius(8)
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(colors.textPrimary.opacity(0.2), lineWidth: 1))
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(colors.textPrimary.opacity(0.2), lineWidth: 1))
                         }
+                        .buttonStyle(PressableButtonStyle())
                     }
                 }
             }

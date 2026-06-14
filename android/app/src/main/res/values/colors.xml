@@ -27,4 +27,8 @@
     <!-- Dark mode colors (explicit for widget) -->
     <color name="text_primary_dark">#E0E0E0</color>
     <color name="text_secondary_dark">#B0B0B0</color>
+
+    <!-- Transient flash on the hero price when it ticks up/down -->
+    <color name="price_up">#16C784</color>
+    <color name="price_down">#EA3943</color>
 </resources>
