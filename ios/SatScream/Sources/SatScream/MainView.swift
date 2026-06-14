@@ -72,7 +72,10 @@ struct MainView: View {
                                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                 showPumpSheet = true
                             } label: {
-                                Text("Set Pump Alert")
+                                HStack(spacing: 6) {
+                                    Image(systemName: "arrow.up.right")
+                                    Text("Set Pump Alert")
+                                }
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(colors.btnText)
                                 .frame(maxWidth: .infinity, minHeight: 48)
@@ -96,7 +99,10 @@ struct MainView: View {
                                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                 showDumpSheet = true
                             } label: {
-                                Text("Set Dump Alert")
+                                HStack(spacing: 6) {
+                                    Image(systemName: "arrow.down.right")
+                                    Text("Set Dump Alert")
+                                }
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(colors.btnText)
                                 .frame(maxWidth: .infinity, minHeight: 48)
@@ -136,7 +142,7 @@ struct MainView: View {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 showAudio = true
                             } label: {
-                                Image(systemName: "speaker.wave.2")
+                                Image(systemName: "bell.badge")
                                 .foregroundColor(colors.textSecondary)
                                 .frame(width: 48, height: 48)
                             }
@@ -145,17 +151,19 @@ struct MainView: View {
 
                             Spacer()
 
-                            HStack(spacing: 8) {
-                                Text("Dark Mode")
-                                .font(.system(size: 10))
+                            // Dark-mode toggle as a single sun/moon icon (shows the
+                            // current theme; tap flips it).
+                            Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                viewModel.toggleDarkMode(!viewModel.isDarkMode)
+                            } label: {
+                                Image(systemName: viewModel.isDarkMode ? "moon.stars" : "sun.max")
                                 .foregroundColor(colors.textSecondary)
-                                Toggle("", isOn: Binding(
-                                    get: { viewModel.isDarkMode },
-                                    set: { viewModel.toggleDarkMode($0) }
-                                ))
-                                .labelsHidden()
-                                .tint(Color(hex: 0x4F4F4F))
+                                .frame(width: 48, height: 48)
+                                .symbolReplaceTransition()
+                                .animation(.easeInOut(duration: 0.25), value: viewModel.isDarkMode)
                             }
+                            .buttonStyle(PressableButtonStyle())
 
                             Spacer()
 
