@@ -93,7 +93,11 @@
                         android:textColor="@color/btn_background"
                         android:fontFamily="sans-serif-medium"
                         android:minHeight="@dimen/min_touch_target"
-                        android:stateListAnimator="@null"
+                        app:icon="@drawable/ic_arrow_up_right"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/btn_background"
+                        app:iconPadding="6dp"
+                        android:stateListAnimator="@animator/btn_press_scale"
                         android:layout_marginBottom="@dimen/spacing_small" />
 
                     <TextView
@@ -136,7 +140,11 @@
                         android:textColor="@color/btn_background"
                         android:fontFamily="sans-serif-medium"
                         android:minHeight="@dimen/min_touch_target"
-                        android:stateListAnimator="@null"
+                        app:icon="@drawable/ic_arrow_down_right"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/btn_background"
+                        app:iconPadding="6dp"
+                        android:stateListAnimator="@animator/btn_press_scale"
                         android:layout_marginBottom="@dimen/spacing_small"/>
 
                     <TextView
@@ -166,31 +174,18 @@
 
     </ScrollView>
 
-    <!-- Dark Mode Toggle - Fixed at bottom center -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+    <!-- Dark Mode Toggle - sun/moon icon, fixed at bottom center -->
+    <ImageButton
+        android:id="@+id/btnDarkMode"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="bottom|center_horizontal"
-        android:padding="@dimen/spacing_large"
-        android:background="@color/background_main">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/dark_mode"
-            android:textSize="@dimen/text_small"
-            android:textColor="@color/text_secondary"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/spacing_small"/>
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switchDarkMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:thumbTint="@color/switch_thumb_color"
-            app:trackTint="@color/switch_track_color" />
-    </LinearLayout>
+        android:layout_margin="@dimen/spacing_large"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_sun"
+        android:stateListAnimator="@animator/btn_press_scale"
+        android:contentDescription="@string/dark_mode"
+        app:tint="@color/text_secondary" />
 
     <!-- Info Icon - Fixed at bottom right -->
     <ImageButton
@@ -200,7 +195,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/spacing_large"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_dialog_info"
+        android:src="@drawable/ic_info"
+        android:stateListAnimator="@animator/btn_press_scale"
         android:contentDescription="@string/information"
         app:tint="@color/text_secondary" />
 
@@ -212,7 +208,8 @@
         android:layout_gravity="bottom|start"
         android:layout_margin="@dimen/spacing_large"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_lock_silent_mode_off"
+        android:src="@drawable/ic_bell"
+        android:stateListAnimator="@animator/btn_press_scale"
         android:contentDescription="@string/audio_settings"
         app:tint="@color/text_secondary" />
 
