@@ -273,13 +273,11 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("SetTextI18n", "InflateParams")
     private fun showPriceInputBottomSheet(isPump: Boolean) {
-        val bottomSheetDialog = BottomSheetDialog(this)
+        // Custom theme rounds + colors the sheet's own surface (see themes.xml), so
+        // no secondary background peeks out behind the rounded corners.
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.Theme_SatScream_BottomSheetDialog)
         val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_price_input, null)
         bottomSheetDialog.setContentView(bottomSheetView)
-
-        // Make the dialog's own container transparent so the sheet's rounded top
-        // corners (bottom_sheet_bg) aren't hidden behind a square background.
-        (bottomSheetView.parent as? View)?.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
         // Set title based on alert type
         val tvTitle = bottomSheetView.findViewById<TextView>(R.id.tvBottomSheetTitle)
