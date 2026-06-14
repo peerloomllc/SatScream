@@ -93,10 +93,6 @@
                         android:textColor="@color/btn_background"
                         android:fontFamily="sans-serif-medium"
                         android:minHeight="@dimen/min_touch_target"
-                        app:icon="@drawable/ic_arrow_up_right"
-                        app:iconGravity="textStart"
-                        app:iconTint="@color/btn_background"
-                        app:iconPadding="6dp"
                         android:stateListAnimator="@animator/btn_press_scale"
                         android:layout_marginBottom="@dimen/spacing_small" />
 
@@ -140,10 +136,6 @@
                         android:textColor="@color/btn_background"
                         android:fontFamily="sans-serif-medium"
                         android:minHeight="@dimen/min_touch_target"
-                        app:icon="@drawable/ic_arrow_down_right"
-                        app:iconGravity="textStart"
-                        app:iconTint="@color/btn_background"
-                        app:iconPadding="6dp"
                         android:stateListAnimator="@animator/btn_press_scale"
                         android:layout_marginBottom="@dimen/spacing_small"/>
 

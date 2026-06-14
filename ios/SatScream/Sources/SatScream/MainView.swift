@@ -72,10 +72,7 @@ struct MainView: View {
                                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                 showPumpSheet = true
                             } label: {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "arrow.up.right")
-                                    Text("Set Pump Alert")
-                                }
+                                Text("Set Pump Alert")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(colors.btnText)
                                 .frame(maxWidth: .infinity, minHeight: 48)
@@ -99,10 +96,7 @@ struct MainView: View {
                                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                 showDumpSheet = true
                             } label: {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "arrow.down.right")
-                                    Text("Set Dump Alert")
-                                }
+                                Text("Set Dump Alert")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(colors.btnText)
                                 .frame(maxWidth: .infinity, minHeight: 48)
