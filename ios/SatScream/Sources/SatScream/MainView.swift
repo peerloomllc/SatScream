@@ -276,7 +276,10 @@ private struct AlertHitRocket: View {
         .opacity(finished ? 0 : 1)
         .onAppear {
             withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) { pulse = true }
-            withAnimation(.easeIn(duration: passDuration).repeatCount(passes, autoreverses: false)) {
+            // Constant speed so the rocket is clearly visible across the whole
+            // screen in both directions (an easing curve hid the dump pass: it
+            // lingered off-screen at the top then zipped through too fast).
+            withAnimation(.linear(duration: passDuration).repeatCount(passes, autoreverses: false)) {
                 progress = 1
             }
             // Hide once both passes complete.

@@ -580,7 +580,10 @@ class MainActivity : AppCompatActivity() {
             duration = 1400
             repeatCount = 1 // plays twice total
             repeatMode = android.animation.ValueAnimator.RESTART
-            interpolator = android.view.animation.AccelerateInterpolator()
+            // Constant speed so the rocket is clearly visible the whole way in
+            // both directions. An accelerating curve hid the dump pass (it
+            // lingered off-screen at the top, then zipped down too fast).
+            interpolator = android.view.animation.LinearInterpolator()
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) = hideHitIcon()
             })
