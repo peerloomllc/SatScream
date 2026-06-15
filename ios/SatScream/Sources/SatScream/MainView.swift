@@ -7,6 +7,12 @@ struct MainView: View {
     @State private var showAudio      = false
     @State private var toastMessage: String? = nil
 
+    // Drives the blast-off: bump `hitTick` each time an alert fires so the rocket
+    // view is recreated and re-animates. `hitIsPump` picks the direction/art for
+    // whichever alert fired most recently — no pump-over-dump priority masking.
+    @State private var hitTick = 0
+    @State private var hitIsPump = true
+
     private var colors: AppColors { AppColors(isDark: viewModel.isDarkMode) }
 
     private var priceColor: Color {
@@ -21,6 +27,17 @@ struct MainView: View {
         GeometryReader { geo in
             ZStack {
                 colors.background.ignoresSafeArea()
+
+                // "Alert hit" rocket blasts across the whole screen: bottom→top for
+                // pump, top→bottom for dump (plays twice, then disappears). Placed
+                // just above the background and beneath the content so its opaque
+                // square blends into the background and the text/buttons it flies
+                // past cover it instead of being covered by its square. Keyed on
+                // hitTick so each fire restarts the animation.
+                if hitTick > 0, let img = Self.hitIcon(isPump: hitIsPump, isDark: viewModel.isDarkMode) {
+                    AlertHitRocket(image: img, isPump: hitIsPump, screenHeight: geo.size.height)
+                    .id(hitTick)
+                }
 
                 // Main content — vertically centered in available space above bottom bar
                 VStack(spacing: 0) {
@@ -85,10 +102,7 @@ struct MainView: View {
                             .font(.system(size: 10))
                             .foregroundColor(colors.textTertiary)
                             .multilineTextAlignment(.center)
-
-                            alertHitIcon(triggered: viewModel.pumpAlertTriggered, isPump: true)
                         }
-                        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.pumpAlertTriggered)
 
                         // Dump column
                         VStack(spacing: 8) {
@@ -109,10 +123,7 @@ struct MainView: View {
                             .font(.system(size: 10))
                             .foregroundColor(colors.textTertiary)
                             .multilineTextAlignment(.center)
-
-                            alertHitIcon(triggered: viewModel.dumpAlertTriggered, isPump: false)
                         }
-                        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.dumpAlertTriggered)
                     }
                     .padding(.horizontal, 24)
 
@@ -201,23 +212,18 @@ struct MainView: View {
             .environmentObject(viewModel)
             .sheetChrome()
         }
-    }
-
-    // Fixed-height slot for the "alert hit" rocket so toggling its visibility
-    // never reflows the centered content above it. The icon springs in within
-    // the reserved space instead of pushing the buttons up.
-    @ViewBuilder
-    private func alertHitIcon(triggered: Bool, isPump: Bool) -> some View {
-        ZStack {
-            if triggered, let img = Self.hitIcon(isPump: isPump, isDark: viewModel.isDarkMode) {
-                Image(uiImage: img)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 48, height: 48)
-                .transition(.scale.combined(with: .opacity))
-            }
+        // Fire the rocket for whichever alert just transitioned to "hit".
+        .onChange(of: viewModel.pumpAlertTriggered) { fired in
+            if fired { hitIsPump = true; hitTick += 1 }
         }
-        .frame(height: 48)
+        .onChange(of: viewModel.dumpAlertTriggered) { fired in
+            if fired { hitIsPump = false; hitTick += 1 }
+        }
+        .onAppear {
+            // Replay once for an alert that was already hit when the screen opened.
+            if viewModel.dumpAlertTriggered { hitIsPump = false; hitTick += 1 }
+            else if viewModel.pumpAlertTriggered { hitIsPump = true; hitTick += 1 }
+        }
     }
 
     // Loads the rocket variant matching the current theme. The PNGs are opaque
@@ -237,6 +243,61 @@ struct MainView: View {
         withAnimation { toastMessage = message }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             withAnimation { toastMessage = nil }
+        }
+    }
+}
+
+// "Alert hit" rocket that blasts across the screen at its original size. The art
+// points up-right, so it's rotated upright for pump (nose up, flying up) and
+// inverted for dump (nose down, flying down). It travels the full screen height
+// twice — with a subtle size pulse — then disappears. No back-and-forth rotation.
+private struct AlertHitRocket: View {
+    let image: UIImage
+    let isPump: Bool
+    let screenHeight: CGFloat
+
+    @State private var progress: CGFloat = 0   // 0 = start edge, 1 = far edge
+    @State private var pulse = false
+    @State private var finished = false
+
+    private let passDuration = 1.4
+    private let passes = 2
+
+    // Fixed orientation so each rocket points the way it travels: pump nose-up,
+    // dump nose-down. (The two art assets aren't oriented the same, hence the
+    // different angles.)
+    private var rotation: Double { isPump ? -45 : 45 }
+
+    // Offset from screen center. Pump starts below the screen and ends above it;
+    // dump is the reverse.
+    private var offsetY: CGFloat {
+        let edge = screenHeight / 2 + 80
+        let start = isPump ? edge : -edge
+        let end = isPump ? -edge : edge
+        return start + (end - start) * progress
+    }
+
+    var body: some View {
+        Image(uiImage: image)
+        .resizable()
+        .scaledToFit()
+        .frame(width: 48, height: 48)
+        .rotationEffect(.degrees(rotation))
+        .scaleEffect(pulse ? 1.12 : 0.9)
+        .offset(y: offsetY)
+        .opacity(finished ? 0 : 1)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) { pulse = true }
+            // Constant speed so the rocket is clearly visible across the whole
+            // screen in both directions (an easing curve hid the dump pass: it
+            // lingered off-screen at the top then zipped through too fast).
+            withAnimation(.linear(duration: passDuration).repeatCount(passes, autoreverses: false)) {
+                progress = 1
+            }
+            // Hide once both passes complete.
+            DispatchQueue.main.asyncAfter(deadline: .now() + passDuration * Double(passes)) {
+                withAnimation(.easeOut(duration: 0.3)) { finished = true }
+            }
         }
     }
 }
