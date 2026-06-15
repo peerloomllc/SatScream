@@ -41,7 +41,9 @@ class MainActivity : AppCompatActivity() {
     // Single large "alert hit" rocket shown in the center-bottom space
     private lateinit var ivAlertHit: ImageView
     private var hitAnimator: android.animation.AnimatorSet? = null
-    private var hitIconShown = false
+    // Which alert the rocket is currently showing for ("pump"/"dump"/null), so the
+    // blast-off plays once per trigger episode rather than on every price tick.
+    private var currentHitKey: String? = null
 
     private var isBitcoinStandardMode = false
     private var currentPrice: Double? = null
@@ -530,60 +532,80 @@ class MainActivity : AppCompatActivity() {
             statusView = tvDumpAlertStatus
         )
 
-        // Single large rocket in the center-bottom space. Pump takes priority if
-        // both somehow fire at once.
-        when {
-            pumpTriggered -> showHitIcon(if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light)
-            dumpTriggered -> showHitIcon(if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light)
-            else -> hideHitIcon()
+        // Rocket "blast off". Pump takes priority if both somehow fire at once.
+        // Play the animation once per trigger episode (when the active alert
+        // changes), not on every price tick.
+        val hitKey = when {
+            pumpTriggered -> "pump"
+            dumpTriggered -> "dump"
+            else -> null
+        }
+        if (hitKey != currentHitKey) {
+            currentHitKey = hitKey
+            when (hitKey) {
+                "pump" -> playHitAnimation(
+                    if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light,
+                    isPump = true
+                )
+                "dump" -> playHitAnimation(
+                    if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light,
+                    isPump = false
+                )
+                else -> hideHitIcon()
+            }
         }
     }
 
-    /** Shows the big rocket (if not already) and starts the wiggle + pulse loop. */
-    private fun showHitIcon(drawableRes: Int) {
-        ivAlertHit.setImageResource(drawableRes)
-        if (hitIconShown) return
-        hitIconShown = true
-        ivAlertHit.visibility = View.VISIBLE
-        startHitAnimation()
-    }
-
-    private fun hideHitIcon() {
-        if (!hitIconShown) return
-        hitIconShown = false
+    /**
+     * Flies the rocket across the full screen height — bottom→top for pump
+     * (nose up), top→bottom for dump (nose down) — twice, with a subtle size
+     * pulse, then hides it. The art points up-right, so it's rotated to sit
+     * upright/inverted. No back-and-forth rotation.
+     */
+    private fun playHitAnimation(drawableRes: Int, isPump: Boolean) {
         hitAnimator?.cancel()
-        hitAnimator = null
-        ivAlertHit.visibility = View.GONE
-    }
+        val v = ivAlertHit
+        v.setImageResource(drawableRes)
+        v.rotation = if (isPump) -45f else 135f
+        v.scaleX = 1f
+        v.scaleY = 1f
+        v.visibility = View.VISIBLE
 
-    // Gentle celebratory motion: rocks ±15° around center and pulses in size, on
-    // separate periods so it reads as organic rather than mechanical.
-    private fun startHitAnimation() {
-        hitAnimator?.cancel()
-        ivAlertHit.rotation = 0f
-        ivAlertHit.scaleX = 1f
-        ivAlertHit.scaleY = 1f
+        // Off-screen edges relative to the centered layout position.
+        val edge = resources.displayMetrics.heightPixels / 2f + 64f * resources.displayMetrics.density
+        val startY = if (isPump) edge else -edge
+        val endY = if (isPump) -edge else edge
 
-        val rotate = android.animation.ObjectAnimator.ofFloat(ivAlertHit, View.ROTATION, -15f, 15f).apply {
-            duration = 700
+        val travel = android.animation.ObjectAnimator.ofFloat(v, View.TRANSLATION_Y, startY, endY).apply {
+            duration = 1400
+            repeatCount = 1 // plays twice total
+            repeatMode = android.animation.ValueAnimator.RESTART
+            interpolator = android.view.animation.AccelerateInterpolator()
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) = hideHitIcon()
+            })
+        }
+        val scaleX = android.animation.ObjectAnimator.ofFloat(v, View.SCALE_X, 0.9f, 1.12f).apply {
+            duration = 500
             repeatCount = android.animation.ValueAnimator.INFINITE
             repeatMode = android.animation.ValueAnimator.REVERSE
         }
-        val scaleX = android.animation.ObjectAnimator.ofFloat(ivAlertHit, View.SCALE_X, 0.92f, 1.08f).apply {
-            duration = 1100
-            repeatCount = android.animation.ValueAnimator.INFINITE
-            repeatMode = android.animation.ValueAnimator.REVERSE
-        }
-        val scaleY = android.animation.ObjectAnimator.ofFloat(ivAlertHit, View.SCALE_Y, 0.92f, 1.08f).apply {
-            duration = 1100
+        val scaleY = android.animation.ObjectAnimator.ofFloat(v, View.SCALE_Y, 0.9f, 1.12f).apply {
+            duration = 500
             repeatCount = android.animation.ValueAnimator.INFINITE
             repeatMode = android.animation.ValueAnimator.REVERSE
         }
         hitAnimator = android.animation.AnimatorSet().apply {
-            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
-            playTogether(rotate, scaleX, scaleY)
+            playTogether(travel, scaleX, scaleY)
             start()
         }
+    }
+
+    private fun hideHitIcon() {
+        hitAnimator?.cancel()
+        hitAnimator = null
+        ivAlertHit.translationY = 0f
+        ivAlertHit.visibility = View.GONE
     }
 
     /**

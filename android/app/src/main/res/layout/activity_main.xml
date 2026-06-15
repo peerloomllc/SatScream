@@ -154,14 +154,13 @@
 
     </ScrollView>
 
-    <!-- Large "alert hit" rocket, centered in the space above the bottom bar.
-         Shown (and animated) only while a pump/dump alert is currently hit. -->
+    <!-- "Alert hit" rocket (original size). Laid out centered; an animation
+         flies it across the full screen height (pump up, dump down) twice. -->
     <ImageView
         android:id="@+id/ivAlertHit"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="96dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
         android:visibility="gone"
         android:contentDescription="@string/pump_alert_icon"/>
 

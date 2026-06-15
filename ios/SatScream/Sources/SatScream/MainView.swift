@@ -110,17 +110,7 @@ struct MainView: View {
                     }
                     .padding(.horizontal, 24)
 
-                    // Large animated "alert hit" rocket fills the space below the
-                    // buttons. Behaves like a Spacer when no alert is active.
-                    ZStack {
-                        if let img = activeHitImage {
-                            AlertHitBadge(image: img)
-                            .transition(.scale.combined(with: .opacity))
-                        }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.6), value: viewModel.pumpAlertTriggered)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.6), value: viewModel.dumpAlertTriggered)
+                    Spacer()
 
                     // Spacer for bottom bar height
                     Spacer().frame(height: 64)
@@ -173,6 +163,13 @@ struct MainView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
 
+                // "Alert hit" rocket blasts across the whole screen: bottom→top for
+                // pump, top→bottom for dump. Plays twice then disappears.
+                if let hit = activeHit {
+                    AlertHitRocket(image: hit.image, isPump: hit.isPump, screenHeight: geo.size.height)
+                    .id(hit.isPump)
+                }
+
                 // Toast overlay
                 if let msg = toastMessage {
                     VStack {
@@ -207,11 +204,15 @@ struct MainView: View {
         }
     }
 
-    // The rocket to show in the center-bottom space: pump takes priority if both
-    // happen to be triggered. nil when no alert is currently hit.
-    private var activeHitImage: UIImage? {
-        if viewModel.pumpAlertTriggered { return Self.hitIcon(isPump: true, isDark: viewModel.isDarkMode) }
-        if viewModel.dumpAlertTriggered { return Self.hitIcon(isPump: false, isDark: viewModel.isDarkMode) }
+    // The active "alert hit" rocket: pump takes priority if both happen to be
+    // triggered. nil when no alert is currently hit.
+    private var activeHit: (image: UIImage, isPump: Bool)? {
+        if viewModel.pumpAlertTriggered, let img = Self.hitIcon(isPump: true, isDark: viewModel.isDarkMode) {
+            return (img, true)
+        }
+        if viewModel.dumpAlertTriggered, let img = Self.hitIcon(isPump: false, isDark: viewModel.isDarkMode) {
+            return (img, false)
+        }
         return nil
     }
 
@@ -236,24 +237,52 @@ struct MainView: View {
     }
 }
 
-// Large celebratory "alert hit" rocket: gently wiggles (±15° from center) and
-// pulses (scales up/down) on a loop while shown. Rotation and pulse run on
-// separate periods so the motion feels organic rather than mechanical.
-private struct AlertHitBadge: View {
+// "Alert hit" rocket that blasts across the screen at its original size. The art
+// points up-right, so it's rotated upright for pump (nose up, flying up) and
+// inverted for dump (nose down, flying down). It travels the full screen height
+// twice — with a subtle size pulse — then disappears. No back-and-forth rotation.
+private struct AlertHitRocket: View {
     let image: UIImage
-    @State private var wiggle = false
+    let isPump: Bool
+    let screenHeight: CGFloat
+
+    @State private var progress: CGFloat = 0   // 0 = start edge, 1 = far edge
     @State private var pulse = false
+    @State private var finished = false
+
+    private let passDuration = 1.4
+    private let passes = 2
+
+    // Fixed orientation: pump nose-up (-45° from the up-right art), dump nose-down.
+    private var rotation: Double { isPump ? -45 : 135 }
+
+    // Offset from screen center. Pump starts below the screen and ends above it;
+    // dump is the reverse.
+    private var offsetY: CGFloat {
+        let edge = screenHeight / 2 + 80
+        let start = isPump ? edge : -edge
+        let end = isPump ? -edge : edge
+        return start + (end - start) * progress
+    }
 
     var body: some View {
         Image(uiImage: image)
         .resizable()
         .scaledToFit()
-        .frame(width: 130, height: 130)
-        .rotationEffect(.degrees(wiggle ? 15 : -15))
-        .scaleEffect(pulse ? 1.08 : 0.92)
+        .frame(width: 48, height: 48)
+        .rotationEffect(.degrees(rotation))
+        .scaleEffect(pulse ? 1.12 : 0.9)
+        .offset(y: offsetY)
+        .opacity(finished ? 0 : 1)
         .onAppear {
-            withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) { wiggle = true }
-            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) { pulse = true }
+            withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) { pulse = true }
+            withAnimation(.easeIn(duration: passDuration).repeatCount(passes, autoreverses: false)) {
+                progress = 1
+            }
+            // Hide once both passes complete.
+            DispatchQueue.main.asyncAfter(deadline: .now() + passDuration * Double(passes)) {
+                withAnimation(.easeOut(duration: 0.3)) { finished = true }
+            }
         }
     }
 }
