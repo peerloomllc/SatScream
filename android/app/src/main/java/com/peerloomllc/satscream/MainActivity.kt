@@ -566,7 +566,9 @@ class MainActivity : AppCompatActivity() {
         hitAnimator?.cancel()
         val v = ivAlertHit
         v.setImageResource(drawableRes)
-        v.rotation = if (isPump) -45f else 135f
+        // Point each rocket the way it travels (pump up, dump down). The two art
+        // assets aren't oriented the same, hence the different angles.
+        v.rotation = if (isPump) -45f else 45f
         v.scaleX = 1f
         v.scaleY = 1f
         v.visibility = View.VISIBLE

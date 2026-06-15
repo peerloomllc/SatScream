@@ -253,8 +253,10 @@ private struct AlertHitRocket: View {
     private let passDuration = 1.4
     private let passes = 2
 
-    // Fixed orientation: pump nose-up (-45° from the up-right art), dump nose-down.
-    private var rotation: Double { isPump ? -45 : 135 }
+    // Fixed orientation so each rocket points the way it travels: pump nose-up,
+    // dump nose-down. (The two art assets aren't oriented the same, hence the
+    // different angles.)
+    private var rotation: Double { isPump ? -45 : 45 }
 
     // Offset from screen center. Pump starts below the screen and ends above it;
     // dump is the reverse.
