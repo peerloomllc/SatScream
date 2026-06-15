@@ -7,11 +7,11 @@ struct MainView: View {
     @State private var showAudio      = false
     @State private var toastMessage: String? = nil
 
-    // Drives the blast-off: bump `hitTick` each time an alert fires so the rocket
-    // view is recreated and re-animates. `hitIsPump` picks the direction/art for
+    // Each alert fire launches a fresh burst of 20–30 rockets, each at a random
+    // horizontal position and start delay. `burstIsPump` picks direction/art for
     // whichever alert fired most recently — no pump-over-dump priority masking.
-    @State private var hitTick = 0
-    @State private var hitIsPump = true
+    @State private var rockets: [RocketSpec] = []
+    @State private var burstIsPump = true
 
     private var colors: AppColors { AppColors(isDark: viewModel.isDarkMode) }
 
@@ -28,15 +28,16 @@ struct MainView: View {
             ZStack {
                 colors.background.ignoresSafeArea()
 
-                // "Alert hit" rocket blasts across the whole screen: bottom→top for
-                // pump, top→bottom for dump (plays twice, then disappears). Placed
-                // just above the background and beneath the content so its opaque
-                // square blends into the background and the text/buttons it flies
-                // past cover it instead of being covered by its square. Keyed on
-                // hitTick so each fire restarts the animation.
-                if hitTick > 0, let img = Self.hitIcon(isPump: hitIsPump, isDark: viewModel.isDarkMode) {
-                    AlertHitRocket(image: img, isPump: hitIsPump, screenHeight: geo.size.height)
-                    .id(hitTick)
+                // "Alert hit" rocket burst: a swarm of rockets crosses the screen
+                // (bottom→top for pump, top→bottom for dump) at random x positions
+                // and staggered start times. Placed just above the background and
+                // beneath the content so each opaque square blends into the
+                // background while the text/buttons it flies past cover it.
+                if let img = Self.hitIcon(isPump: burstIsPump, isDark: viewModel.isDarkMode) {
+                    ForEach(rockets) { spec in
+                        AlertHitRocket(image: img, isPump: burstIsPump, screenSize: geo.size,
+                                       xFraction: spec.xFraction, delay: spec.delay)
+                    }
                 }
 
                 // Main content — vertically centered in available space above bottom bar
@@ -212,17 +213,28 @@ struct MainView: View {
             .environmentObject(viewModel)
             .sheetChrome()
         }
-        // Fire the rocket for whichever alert just transitioned to "hit".
+        // Launch a burst for whichever alert just transitioned to "hit".
         .onChange(of: viewModel.pumpAlertTriggered) { fired in
-            if fired { hitIsPump = true; hitTick += 1 }
+            if fired { launchBurst(isPump: true) }
         }
         .onChange(of: viewModel.dumpAlertTriggered) { fired in
-            if fired { hitIsPump = false; hitTick += 1 }
+            if fired { launchBurst(isPump: false) }
         }
         .onAppear {
             // Replay once for an alert that was already hit when the screen opened.
-            if viewModel.dumpAlertTriggered { hitIsPump = false; hitTick += 1 }
-            else if viewModel.pumpAlertTriggered { hitIsPump = true; hitTick += 1 }
+            if viewModel.dumpAlertTriggered { launchBurst(isPump: false) }
+            else if viewModel.pumpAlertTriggered { launchBurst(isPump: true) }
+        }
+    }
+
+    // Spawns a fresh swarm of 20–30 rockets, each with a random horizontal
+    // position and start delay. Reassigning `rockets` replaces any prior burst.
+    private func launchBurst(isPump: Bool) {
+        burstIsPump = isPump
+        let count = Int.random(in: 20...30)
+        rockets = (0..<count).map { _ in
+            RocketSpec(xFraction: CGFloat.random(in: 0.08...0.92),
+                       delay: Double.random(in: 0...2.0))
         }
     }
 
@@ -247,31 +259,34 @@ struct MainView: View {
     }
 }
 
-// "Alert hit" rocket that blasts across the screen at its original size. The art
-// points up-right, so it's rotated upright for pump (nose up, flying up) and
-// inverted for dump (nose down, flying down). It travels the full screen height
-// twice — with a subtle size pulse — then disappears. No back-and-forth rotation.
+// One rocket in an alert-hit burst: appears at a random x, waits `delay`, then
+// crosses the full screen height once at constant speed — bottom→top for pump
+// (nose up), top→bottom for dump (nose down) — with a subtle size pulse. The art
+// assets aren't oriented the same, hence the different angles.
+private struct RocketSpec: Identifiable {
+    let id = UUID()
+    let xFraction: CGFloat   // 0…1 across the screen width
+    let delay: Double        // seconds before this rocket launches
+}
+
 private struct AlertHitRocket: View {
     let image: UIImage
     let isPump: Bool
-    let screenHeight: CGFloat
+    let screenSize: CGSize
+    let xFraction: CGFloat
+    let delay: Double
 
     @State private var progress: CGFloat = 0   // 0 = start edge, 1 = far edge
     @State private var pulse = false
-    @State private var finished = false
 
-    private let passDuration = 1.4
-    private let passes = 2
-
-    // Fixed orientation so each rocket points the way it travels: pump nose-up,
-    // dump nose-down. (The two art assets aren't oriented the same, hence the
-    // different angles.)
     private var rotation: Double { isPump ? -45 : 45 }
+    private var xOffset: CGFloat { (xFraction - 0.5) * screenSize.width }
 
     // Offset from screen center. Pump starts below the screen and ends above it;
-    // dump is the reverse.
-    private var offsetY: CGFloat {
-        let edge = screenHeight / 2 + 80
+    // dump is the reverse. At progress 0 and 1 the rocket sits off-screen, so it
+    // stays hidden before its delay and after it exits.
+    private var yOffset: CGFloat {
+        let edge = screenSize.height / 2 + 80
         let start = isPump ? edge : -edge
         let end = isPump ? -edge : edge
         return start + (end - start) * progress
@@ -284,19 +299,11 @@ private struct AlertHitRocket: View {
         .frame(width: 48, height: 48)
         .rotationEffect(.degrees(rotation))
         .scaleEffect(pulse ? 1.12 : 0.9)
-        .offset(y: offsetY)
-        .opacity(finished ? 0 : 1)
+        .offset(x: xOffset, y: yOffset)
         .onAppear {
-            withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) { pulse = true }
-            // Constant speed so the rocket is clearly visible across the whole
-            // screen in both directions (an easing curve hid the dump pass: it
-            // lingered off-screen at the top then zipped through too fast).
-            withAnimation(.linear(duration: passDuration).repeatCount(passes, autoreverses: false)) {
-                progress = 1
-            }
-            // Hide once both passes complete.
-            DispatchQueue.main.asyncAfter(deadline: .now() + passDuration * Double(passes)) {
-                withAnimation(.easeOut(duration: 0.3)) { finished = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.easeInOut(duration: 0.4).repeatForever(autoreverses: true)) { pulse = true }
+                withAnimation(.linear(duration: 1.4)) { progress = 1 }
             }
         }
     }

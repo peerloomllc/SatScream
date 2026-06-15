@@ -38,13 +38,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSetDumpAlert: Button
     private lateinit var tvDumpAlertStatus: TextView
 
-    // Single large "alert hit" rocket shown in the center-bottom space
-    private lateinit var ivAlertHit: ImageView
-    private var hitAnimator: android.animation.AnimatorSet? = null
-    // Previous triggered states, so we can fire the blast-off for whichever alert
-    // *just* crossed (false -> true) rather than on every price tick. This also
-    // means a dump hit shows the dump rocket even while a pump alert is still
-    // latched (and vice-versa) — no priority masking.
+    // Alert-hit rocket burst: rocket ImageViews are created on the fly and added
+    // behind the content; these track the live ones so a new burst can clear them.
+    private lateinit var rootFrame: android.widget.FrameLayout
+    private val burstSets = mutableListOf<android.animation.AnimatorSet>()
+    private val burstViews = mutableListOf<ImageView>()
+    // Previous triggered states, so we fire the burst for whichever alert *just*
+    // crossed (false -> true) rather than on every price tick. This also means a
+    // dump hit shows the dump rocket even while a pump alert is still latched (and
+    // vice-versa) — no priority masking.
     private var prevPumpTriggered = false
     private var prevDumpTriggered = false
 
@@ -117,7 +119,7 @@ class MainActivity : AppCompatActivity() {
         btnSetDumpAlert = findViewById(R.id.btnSetDumpAlert)
         tvDumpAlertStatus = findViewById(R.id.tvDumpAlertStatus)
 
-        ivAlertHit = findViewById(R.id.ivAlertHit)
+        rootFrame = findViewById(R.id.rootFrame)
 
         btnInfo = findViewById(R.id.btnInfo)
         btnAudioSettings = findViewById(R.id.btnAudioSettings)
@@ -543,74 +545,80 @@ class MainActivity : AppCompatActivity() {
         prevDumpTriggered = dumpTriggered
 
         when {
-            dumpJustFired -> playHitAnimation(
+            dumpJustFired -> launchHitBurst(
                 if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light,
                 isPump = false
             )
-            pumpJustFired -> playHitAnimation(
+            pumpJustFired -> launchHitBurst(
                 if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light,
                 isPump = true
             )
         }
-        // Clear any lingering rocket once neither alert is hit.
-        if (!pumpTriggered && !dumpTriggered) hideHitIcon()
+        // Clear any lingering rockets once neither alert is hit.
+        if (!pumpTriggered && !dumpTriggered) clearBurst()
     }
 
     /**
-     * Flies the rocket across the full screen height — bottom→top for pump
-     * (nose up), top→bottom for dump (nose down) — twice, with a subtle size
-     * pulse, then hides it. The art points up-right, so it's rotated to sit
-     * upright/inverted. No back-and-forth rotation.
+     * Launches a burst of 20–30 rockets across the full screen height — bottom→top
+     * for pump (nose up), top→bottom for dump (nose down) — each at a random
+     * horizontal position and a random start delay, with a subtle size pulse. The
+     * two art assets aren't oriented the same, hence the different angles. Rockets
+     * are added behind the content (index 0) and removed when they finish.
      */
-    private fun playHitAnimation(drawableRes: Int, isPump: Boolean) {
-        hitAnimator?.cancel()
-        val v = ivAlertHit
-        v.setImageResource(drawableRes)
-        // Point each rocket the way it travels (pump up, dump down). The two art
-        // assets aren't oriented the same, hence the different angles.
-        v.rotation = if (isPump) -45f else 45f
-        v.scaleX = 1f
-        v.scaleY = 1f
-        v.visibility = View.VISIBLE
+    private fun launchHitBurst(drawableRes: Int, isPump: Boolean) {
+        clearBurst()
 
-        // Off-screen edges relative to the centered layout position.
-        val edge = resources.displayMetrics.heightPixels / 2f + 64f * resources.displayMetrics.density
+        val dm = resources.displayMetrics
+        val sizePx = (48 * dm.density).toInt()
+        val edge = dm.heightPixels / 2f + 64f * dm.density
         val startY = if (isPump) edge else -edge
         val endY = if (isPump) -edge else edge
+        val rot = if (isPump) -45f else 45f
+        val usableWidth = dm.widthPixels * 0.84f
 
-        val travel = android.animation.ObjectAnimator.ofFloat(v, View.TRANSLATION_Y, startY, endY).apply {
-            duration = 1400
-            repeatCount = 1 // plays twice total
-            repeatMode = android.animation.ValueAnimator.RESTART
-            // Constant speed so the rocket is clearly visible the whole way in
-            // both directions. An accelerating curve hid the dump pass (it
-            // lingered off-screen at the top, then zipped down too fast).
-            interpolator = android.view.animation.LinearInterpolator()
-            addListener(object : android.animation.AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: android.animation.Animator) = hideHitIcon()
+        val count = (20..30).random()
+        repeat(count) {
+            val iv = ImageView(this)
+            iv.setImageResource(drawableRes)
+            iv.rotation = rot
+            iv.scaleX = 0.9f
+            iv.scaleY = 0.9f
+            iv.translationX = (Math.random().toFloat() - 0.5f) * usableWidth
+            iv.translationY = startY
+            iv.layoutParams = android.widget.FrameLayout.LayoutParams(sizePx, sizePx, android.view.Gravity.CENTER)
+            rootFrame.addView(iv, 0) // index 0 => behind the content
+            burstViews.add(iv)
+
+            val travel = android.animation.ObjectAnimator.ofFloat(iv, View.TRANSLATION_Y, startY, endY).apply {
+                duration = 1400
+                interpolator = android.view.animation.LinearInterpolator()
+            }
+            val scaleX = android.animation.ObjectAnimator.ofFloat(iv, View.SCALE_X, 0.9f, 1.12f).apply {
+                duration = 350; repeatCount = 3; repeatMode = android.animation.ValueAnimator.REVERSE
+            }
+            val scaleY = android.animation.ObjectAnimator.ofFloat(iv, View.SCALE_Y, 0.9f, 1.12f).apply {
+                duration = 350; repeatCount = 3; repeatMode = android.animation.ValueAnimator.REVERSE
+            }
+            val set = android.animation.AnimatorSet()
+            set.playTogether(travel, scaleX, scaleY)
+            set.startDelay = (Math.random() * 2000).toLong()
+            set.addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    rootFrame.removeView(iv)
+                    burstViews.remove(iv)
+                    burstSets.remove(set)
+                }
             })
-        }
-        val scaleX = android.animation.ObjectAnimator.ofFloat(v, View.SCALE_X, 0.9f, 1.12f).apply {
-            duration = 500
-            repeatCount = android.animation.ValueAnimator.INFINITE
-            repeatMode = android.animation.ValueAnimator.REVERSE
-        }
-        val scaleY = android.animation.ObjectAnimator.ofFloat(v, View.SCALE_Y, 0.9f, 1.12f).apply {
-            duration = 500
-            repeatCount = android.animation.ValueAnimator.INFINITE
-            repeatMode = android.animation.ValueAnimator.REVERSE
-        }
-        hitAnimator = android.animation.AnimatorSet().apply {
-            playTogether(travel, scaleX, scaleY)
-            start()
+            burstSets.add(set)
+            set.start()
         }
     }
 
-    private fun hideHitIcon() {
-        hitAnimator?.cancel()
-        hitAnimator = null
-        ivAlertHit.translationY = 0f
-        ivAlertHit.visibility = View.GONE
+    private fun clearBurst() {
+        burstSets.toList().forEach { it.cancel() }
+        burstSets.clear()
+        burstViews.toList().forEach { rootFrame.removeView(it) }
+        burstViews.clear()
     }
 
     /**
