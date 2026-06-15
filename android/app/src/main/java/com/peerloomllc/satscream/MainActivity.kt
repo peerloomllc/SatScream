@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -35,11 +34,14 @@ class MainActivity : AppCompatActivity() {
     // Alert buttons
     private lateinit var btnSetPumpAlert: Button
     private lateinit var tvPumpAlertStatus: TextView
-    private lateinit var ivPumpIcon: ImageView
 
     private lateinit var btnSetDumpAlert: Button
     private lateinit var tvDumpAlertStatus: TextView
-    private lateinit var ivDumpIcon: ImageView
+
+    // Single large "alert hit" rocket shown in the center-bottom space
+    private lateinit var ivAlertHit: ImageView
+    private var hitAnimator: android.animation.AnimatorSet? = null
+    private var hitIconShown = false
 
     private var isBitcoinStandardMode = false
     private var currentPrice: Double? = null
@@ -106,11 +108,11 @@ class MainActivity : AppCompatActivity() {
 
         btnSetPumpAlert = findViewById(R.id.btnSetPumpAlert)
         tvPumpAlertStatus = findViewById(R.id.tvPumpAlertStatus)
-        ivPumpIcon = findViewById(R.id.ivPumpIcon)
 
         btnSetDumpAlert = findViewById(R.id.btnSetDumpAlert)
         tvDumpAlertStatus = findViewById(R.id.tvDumpAlertStatus)
-        ivDumpIcon = findViewById(R.id.ivDumpIcon)
+
+        ivAlertHit = findViewById(R.id.ivAlertHit)
 
         btnInfo = findViewById(R.id.btnInfo)
         btnAudioSettings = findViewById(R.id.btnAudioSettings)
@@ -508,26 +510,80 @@ class MainActivity : AppCompatActivity() {
         val lastPrice = sharedPrefs.getFloat(Prefs.LAST_PRICE, 0f)
         val isDarkMode = sharedPrefs.getBoolean(Prefs.DARK_MODE, false)
 
+        val pumpTriggered = sharedPrefs.getBoolean(Prefs.PUMP_TRIGGERED, false)
+        val dumpTriggered = sharedPrefs.getBoolean(Prefs.DUMP_TRIGGERED, false)
+
         renderAlertStatus(
             label = "Pump",
             target = sharedPrefs.getFloat(Prefs.PUMP_TARGET, 0f),
-            triggered = sharedPrefs.getBoolean(Prefs.PUMP_TRIGGERED, false),
+            triggered = pumpTriggered,
             wasSetInBitcoinMode = sharedPrefs.getBoolean(Prefs.PUMP_IS_BITCOIN_MODE, false),
             lastPrice = lastPrice,
-            statusView = tvPumpAlertStatus,
-            iconView = ivPumpIcon,
-            hitIcon = if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light
+            statusView = tvPumpAlertStatus
         )
         renderAlertStatus(
             label = "Dump",
             target = sharedPrefs.getFloat(Prefs.DUMP_TARGET, 0f),
-            triggered = sharedPrefs.getBoolean(Prefs.DUMP_TRIGGERED, false),
+            triggered = dumpTriggered,
             wasSetInBitcoinMode = sharedPrefs.getBoolean(Prefs.DUMP_IS_BITCOIN_MODE, false),
             lastPrice = lastPrice,
-            statusView = tvDumpAlertStatus,
-            iconView = ivDumpIcon,
-            hitIcon = if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light
+            statusView = tvDumpAlertStatus
         )
+
+        // Single large rocket in the center-bottom space. Pump takes priority if
+        // both somehow fire at once.
+        when {
+            pumpTriggered -> showHitIcon(if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light)
+            dumpTriggered -> showHitIcon(if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light)
+            else -> hideHitIcon()
+        }
+    }
+
+    /** Shows the big rocket (if not already) and starts the wiggle + pulse loop. */
+    private fun showHitIcon(drawableRes: Int) {
+        ivAlertHit.setImageResource(drawableRes)
+        if (hitIconShown) return
+        hitIconShown = true
+        ivAlertHit.visibility = View.VISIBLE
+        startHitAnimation()
+    }
+
+    private fun hideHitIcon() {
+        if (!hitIconShown) return
+        hitIconShown = false
+        hitAnimator?.cancel()
+        hitAnimator = null
+        ivAlertHit.visibility = View.GONE
+    }
+
+    // Gentle celebratory motion: rocks ±15° around center and pulses in size, on
+    // separate periods so it reads as organic rather than mechanical.
+    private fun startHitAnimation() {
+        hitAnimator?.cancel()
+        ivAlertHit.rotation = 0f
+        ivAlertHit.scaleX = 1f
+        ivAlertHit.scaleY = 1f
+
+        val rotate = android.animation.ObjectAnimator.ofFloat(ivAlertHit, View.ROTATION, -15f, 15f).apply {
+            duration = 700
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            repeatMode = android.animation.ValueAnimator.REVERSE
+        }
+        val scaleX = android.animation.ObjectAnimator.ofFloat(ivAlertHit, View.SCALE_X, 0.92f, 1.08f).apply {
+            duration = 1100
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            repeatMode = android.animation.ValueAnimator.REVERSE
+        }
+        val scaleY = android.animation.ObjectAnimator.ofFloat(ivAlertHit, View.SCALE_Y, 0.92f, 1.08f).apply {
+            duration = 1100
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            repeatMode = android.animation.ValueAnimator.REVERSE
+        }
+        hitAnimator = android.animation.AnimatorSet().apply {
+            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+            playTogether(rotate, scaleX, scaleY)
+            start()
+        }
     }
 
     /**
@@ -543,13 +599,10 @@ class MainActivity : AppCompatActivity() {
         triggered: Boolean,
         wasSetInBitcoinMode: Boolean,
         lastPrice: Float,
-        statusView: TextView,
-        iconView: ImageView,
-        hitIcon: Int
+        statusView: TextView
     ) {
         if (target <= 0f) {
             statusView.text = "No ${label.lowercase(Locale.US)} alert set"
-            iconView.visibility = View.INVISIBLE
             return
         }
 
@@ -560,23 +613,8 @@ class MainActivity : AppCompatActivity() {
                 BtcPrice.formatUsd(lastPrice.toDouble())
             }
             statusView.text = "${label.uppercase(Locale.US)} HIT: $priceText"
-            val wasVisible = iconView.visibility == View.VISIBLE
-            iconView.setImageResource(hitIcon)
-            iconView.visibility = View.VISIBLE
-            // Spring the icon in only on the transition into the HIT state.
-            if (!wasVisible) {
-                iconView.animate().cancel()
-                iconView.scaleX = 0f
-                iconView.scaleY = 0f
-                iconView.animate()
-                    .scaleX(1f).scaleY(1f)
-                    .setInterpolator(OvershootInterpolator())
-                    .setDuration(420)
-                    .start()
-            }
         } else {
             statusView.text = "$label alert: ${formatAlertTarget(target, wasSetInBitcoinMode)}"
-            iconView.visibility = View.INVISIBLE
         }
     }
 

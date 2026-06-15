@@ -85,10 +85,7 @@ struct MainView: View {
                             .font(.system(size: 10))
                             .foregroundColor(colors.textTertiary)
                             .multilineTextAlignment(.center)
-
-                            alertHitIcon(triggered: viewModel.pumpAlertTriggered, isPump: true)
                         }
-                        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.pumpAlertTriggered)
 
                         // Dump column
                         VStack(spacing: 8) {
@@ -109,14 +106,21 @@ struct MainView: View {
                             .font(.system(size: 10))
                             .foregroundColor(colors.textTertiary)
                             .multilineTextAlignment(.center)
-
-                            alertHitIcon(triggered: viewModel.dumpAlertTriggered, isPump: false)
                         }
-                        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: viewModel.dumpAlertTriggered)
                     }
                     .padding(.horizontal, 24)
 
-                    Spacer()
+                    // Large animated "alert hit" rocket fills the space below the
+                    // buttons. Behaves like a Spacer when no alert is active.
+                    ZStack {
+                        if let img = activeHitImage {
+                            AlertHitBadge(image: img)
+                            .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.6), value: viewModel.pumpAlertTriggered)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.6), value: viewModel.dumpAlertTriggered)
 
                     // Spacer for bottom bar height
                     Spacer().frame(height: 64)
@@ -203,21 +207,12 @@ struct MainView: View {
         }
     }
 
-    // Fixed-height slot for the "alert hit" rocket so toggling its visibility
-    // never reflows the centered content above it. The icon springs in within
-    // the reserved space instead of pushing the buttons up.
-    @ViewBuilder
-    private func alertHitIcon(triggered: Bool, isPump: Bool) -> some View {
-        ZStack {
-            if triggered, let img = Self.hitIcon(isPump: isPump, isDark: viewModel.isDarkMode) {
-                Image(uiImage: img)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 48, height: 48)
-                .transition(.scale.combined(with: .opacity))
-            }
-        }
-        .frame(height: 48)
+    // The rocket to show in the center-bottom space: pump takes priority if both
+    // happen to be triggered. nil when no alert is currently hit.
+    private var activeHitImage: UIImage? {
+        if viewModel.pumpAlertTriggered { return Self.hitIcon(isPump: true, isDark: viewModel.isDarkMode) }
+        if viewModel.dumpAlertTriggered { return Self.hitIcon(isPump: false, isDark: viewModel.isDarkMode) }
+        return nil
     }
 
     // Loads the rocket variant matching the current theme. The PNGs are opaque
@@ -237,6 +232,28 @@ struct MainView: View {
         withAnimation { toastMessage = message }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             withAnimation { toastMessage = nil }
+        }
+    }
+}
+
+// Large celebratory "alert hit" rocket: gently wiggles (±15° from center) and
+// pulses (scales up/down) on a loop while shown. Rotation and pulse run on
+// separate periods so the motion feels organic rather than mechanical.
+private struct AlertHitBadge: View {
+    let image: UIImage
+    @State private var wiggle = false
+    @State private var pulse = false
+
+    var body: some View {
+        Image(uiImage: image)
+        .resizable()
+        .scaledToFit()
+        .frame(width: 130, height: 130)
+        .rotationEffect(.degrees(wiggle ? 15 : -15))
+        .scaleEffect(pulse ? 1.08 : 0.92)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) { wiggle = true }
+            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) { pulse = true }
         }
     }
 }

@@ -109,13 +109,6 @@
                         android:textAlignment="center"
                         android:layout_marginBottom="4dp"/>
 
-                    <ImageView
-                        android:id="@+id/ivPumpIcon"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:visibility="invisible"
-                        android:contentDescription="@string/pump_alert_icon"/>
-
                 </LinearLayout>
 
                 <!-- Dump Alert Column -->
@@ -153,13 +146,6 @@
                         android:textAlignment="center"
                         android:layout_marginBottom="4dp"/>
 
-                    <ImageView
-                        android:id="@+id/ivDumpIcon"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:visibility="invisible"
-                        android:contentDescription="@string/dump_alert_icon"/>
-
                 </LinearLayout>
 
             </LinearLayout>
@@ -167,6 +153,17 @@
         </LinearLayout>
 
     </ScrollView>
+
+    <!-- Large "alert hit" rocket, centered in the space above the bottom bar.
+         Shown (and animated) only while a pump/dump alert is currently hit. -->
+    <ImageView
+        android:id="@+id/ivAlertHit"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="96dp"
+        android:visibility="gone"
+        android:contentDescription="@string/pump_alert_icon"/>
 
     <!-- Dark Mode Toggle - sun/moon icon, fixed at bottom center -->
     <ImageButton
