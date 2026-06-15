@@ -7,6 +7,12 @@ struct MainView: View {
     @State private var showAudio      = false
     @State private var toastMessage: String? = nil
 
+    // Drives the blast-off: bump `hitTick` each time an alert fires so the rocket
+    // view is recreated and re-animates. `hitIsPump` picks the direction/art for
+    // whichever alert fired most recently — no pump-over-dump priority masking.
+    @State private var hitTick = 0
+    @State private var hitIsPump = true
+
     private var colors: AppColors { AppColors(isDark: viewModel.isDarkMode) }
 
     private var priceColor: Color {
@@ -26,10 +32,11 @@ struct MainView: View {
                 // pump, top→bottom for dump (plays twice, then disappears). Placed
                 // just above the background and beneath the content so its opaque
                 // square blends into the background and the text/buttons it flies
-                // past cover it instead of being covered by its square.
-                if let hit = activeHit {
-                    AlertHitRocket(image: hit.image, isPump: hit.isPump, screenHeight: geo.size.height)
-                    .id(hit.isPump)
+                // past cover it instead of being covered by its square. Keyed on
+                // hitTick so each fire restarts the animation.
+                if hitTick > 0, let img = Self.hitIcon(isPump: hitIsPump, isDark: viewModel.isDarkMode) {
+                    AlertHitRocket(image: img, isPump: hitIsPump, screenHeight: geo.size.height)
+                    .id(hitTick)
                 }
 
                 // Main content — vertically centered in available space above bottom bar
@@ -205,18 +212,18 @@ struct MainView: View {
             .environmentObject(viewModel)
             .sheetChrome()
         }
-    }
-
-    // The active "alert hit" rocket: pump takes priority if both happen to be
-    // triggered. nil when no alert is currently hit.
-    private var activeHit: (image: UIImage, isPump: Bool)? {
-        if viewModel.pumpAlertTriggered, let img = Self.hitIcon(isPump: true, isDark: viewModel.isDarkMode) {
-            return (img, true)
+        // Fire the rocket for whichever alert just transitioned to "hit".
+        .onChange(of: viewModel.pumpAlertTriggered) { fired in
+            if fired { hitIsPump = true; hitTick += 1 }
         }
-        if viewModel.dumpAlertTriggered, let img = Self.hitIcon(isPump: false, isDark: viewModel.isDarkMode) {
-            return (img, false)
+        .onChange(of: viewModel.dumpAlertTriggered) { fired in
+            if fired { hitIsPump = false; hitTick += 1 }
         }
-        return nil
+        .onAppear {
+            // Replay once for an alert that was already hit when the screen opened.
+            if viewModel.dumpAlertTriggered { hitIsPump = false; hitTick += 1 }
+            else if viewModel.pumpAlertTriggered { hitIsPump = true; hitTick += 1 }
+        }
     }
 
     // Loads the rocket variant matching the current theme. The PNGs are opaque

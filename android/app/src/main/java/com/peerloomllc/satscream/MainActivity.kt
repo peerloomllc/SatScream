@@ -41,9 +41,12 @@ class MainActivity : AppCompatActivity() {
     // Single large "alert hit" rocket shown in the center-bottom space
     private lateinit var ivAlertHit: ImageView
     private var hitAnimator: android.animation.AnimatorSet? = null
-    // Which alert the rocket is currently showing for ("pump"/"dump"/null), so the
-    // blast-off plays once per trigger episode rather than on every price tick.
-    private var currentHitKey: String? = null
+    // Previous triggered states, so we can fire the blast-off for whichever alert
+    // *just* crossed (false -> true) rather than on every price tick. This also
+    // means a dump hit shows the dump rocket even while a pump alert is still
+    // latched (and vice-versa) — no priority masking.
+    private var prevPumpTriggered = false
+    private var prevDumpTriggered = false
 
     private var isBitcoinStandardMode = false
     private var currentPrice: Double? = null
@@ -532,28 +535,25 @@ class MainActivity : AppCompatActivity() {
             statusView = tvDumpAlertStatus
         )
 
-        // Rocket "blast off". Pump takes priority if both somehow fire at once.
-        // Play the animation once per trigger episode (when the active alert
-        // changes), not on every price tick.
-        val hitKey = when {
-            pumpTriggered -> "pump"
-            dumpTriggered -> "dump"
-            else -> null
+        // Rocket "blast off" for whichever alert JUST fired (false -> true), so a
+        // dump hit shows the dump rocket even if a pump alert is still latched.
+        val pumpJustFired = pumpTriggered && !prevPumpTriggered
+        val dumpJustFired = dumpTriggered && !prevDumpTriggered
+        prevPumpTriggered = pumpTriggered
+        prevDumpTriggered = dumpTriggered
+
+        when {
+            dumpJustFired -> playHitAnimation(
+                if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light,
+                isPump = false
+            )
+            pumpJustFired -> playHitAnimation(
+                if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light,
+                isPump = true
+            )
         }
-        if (hitKey != currentHitKey) {
-            currentHitKey = hitKey
-            when (hitKey) {
-                "pump" -> playHitAnimation(
-                    if (isDarkMode) R.drawable.ic_pump_hit_dark else R.drawable.ic_pump_hit_light,
-                    isPump = true
-                )
-                "dump" -> playHitAnimation(
-                    if (isDarkMode) R.drawable.ic_dump_hit_dark else R.drawable.ic_dump_hit_light,
-                    isPump = false
-                )
-                else -> hideHitIcon()
-            }
-        }
+        // Clear any lingering rocket once neither alert is hit.
+        if (!pumpTriggered && !dumpTriggered) hideHitIcon()
     }
 
     /**
