@@ -22,6 +22,16 @@ struct MainView: View {
             ZStack {
                 colors.background.ignoresSafeArea()
 
+                // "Alert hit" rocket blasts across the whole screen: bottom→top for
+                // pump, top→bottom for dump (plays twice, then disappears). Placed
+                // just above the background and beneath the content so its opaque
+                // square blends into the background and the text/buttons it flies
+                // past cover it instead of being covered by its square.
+                if let hit = activeHit {
+                    AlertHitRocket(image: hit.image, isPump: hit.isPump, screenHeight: geo.size.height)
+                    .id(hit.isPump)
+                }
+
                 // Main content — vertically centered in available space above bottom bar
                 VStack(spacing: 0) {
                     Spacer()
@@ -162,13 +172,6 @@ struct MainView: View {
                     .frame(height: 64)
                 }
                 .ignoresSafeArea(edges: .bottom)
-
-                // "Alert hit" rocket blasts across the whole screen: bottom→top for
-                // pump, top→bottom for dump. Plays twice then disappears.
-                if let hit = activeHit {
-                    AlertHitRocket(image: hit.image, isPump: hit.isPump, screenHeight: geo.size.height)
-                    .id(hit.isPump)
-                }
 
                 // Toast overlay
                 if let msg = toastMessage {

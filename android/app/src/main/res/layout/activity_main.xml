@@ -7,6 +7,19 @@
     android:layout_height="match_parent"
     android:background="@color/background_main">
 
+    <!-- "Alert hit" rocket (original size). FIRST child so it draws above the
+         background but beneath the content (text/buttons) — the icon's opaque
+         square matches the background and blends, while text/buttons that it
+         flies past cover it instead of being covered. An animation flies it the
+         full screen height (pump up, dump down) twice. -->
+    <ImageView
+        android:id="@+id/ivAlertHit"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:contentDescription="@string/pump_alert_icon"/>
+
     <!-- Scrollable content -->
     <ScrollView
         android:layout_width="match_parent"
@@ -153,16 +166,6 @@
         </LinearLayout>
 
     </ScrollView>
-
-    <!-- "Alert hit" rocket (original size). Laid out centered; an animation
-         flies it across the full screen height (pump up, dump down) twice. -->
-    <ImageView
-        android:id="@+id/ivAlertHit"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:contentDescription="@string/pump_alert_icon"/>
 
     <!-- Dark Mode Toggle - sun/moon icon, fixed at bottom center -->
     <ImageButton
