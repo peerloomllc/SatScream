@@ -3,22 +3,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_main">
 
-    <!-- "Alert hit" rocket (original size). FIRST child so it draws above the
-         background but beneath the content (text/buttons) — the icon's opaque
-         square matches the background and blends, while text/buttons that it
-         flies past cover it instead of being covered. An animation flies it the
-         full screen height (pump up, dump down) twice. -->
-    <ImageView
-        android:id="@+id/ivAlertHit"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:contentDescription="@string/pump_alert_icon"/>
+    <!-- Alert-hit rocket burst views are added here programmatically at index 0
+         (behind the content) — see MainActivity.launchHitBurst(). -->
 
     <!-- Scrollable content -->
     <ScrollView
