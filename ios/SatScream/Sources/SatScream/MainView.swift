@@ -213,17 +213,14 @@ struct MainView: View {
             .environmentObject(viewModel)
             .sheetChrome()
         }
-        // Launch a burst for whichever alert just transitioned to "hit".
+        // Launch a burst only when an alert *transitions* to "hit" while the
+        // screen is open — not for an alert that was already latched when the
+        // view appeared (avoids a spurious burst on launch).
         .onChange(of: viewModel.pumpAlertTriggered) { fired in
             if fired { launchBurst(isPump: true) }
         }
         .onChange(of: viewModel.dumpAlertTriggered) { fired in
             if fired { launchBurst(isPump: false) }
-        }
-        .onAppear {
-            // Replay once for an alert that was already hit when the screen opened.
-            if viewModel.dumpAlertTriggered { launchBurst(isPump: false) }
-            else if viewModel.pumpAlertTriggered { launchBurst(isPump: true) }
         }
     }
 
