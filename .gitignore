@@ -34,3 +34,17 @@ local.properties
 # Local task tracking (not version-controlled)
 /TODO.md
 /DONE.md
+
+# Release pipeline — kept fully local (not tracked): scripts, release config,
+# and the Zapstore manifest. scripts/.env holds signing passwords & API creds;
+# /dist holds built artifacts.
+/scripts/release.sh
+/scripts/ios-appstore.sh
+/scripts/ios-listing.sh
+/scripts/frame-android-screenshots.sh
+/scripts/assets
+/scripts/app.conf
+/scripts/.env
+/scripts/.env.example
+/zapstore.yaml
+/dist
