@@ -148,6 +148,13 @@ class MainActivity : AppCompatActivity() {
         // Setup UI
         setupAlertUI()
 
+        // Seed the "previously triggered" flags from the saved state so an
+        // already-latched alert isn't treated as a fresh fire on launch or on
+        // activity recreation (e.g. toggling dark mode). The burst should only
+        // play on a genuine trigger transition while the screen is open.
+        prevPumpTriggered = sharedPrefs.getBoolean(Prefs.PUMP_TRIGGERED, false)
+        prevDumpTriggered = sharedPrefs.getBoolean(Prefs.DUMP_TRIGGERED, false)
+
         // Load initial price from SharedPreferences (set by BitcoinService)
         loadPriceFromPrefs()
         // Live updates are driven by the SharedPreferences listener registered in onResume().
