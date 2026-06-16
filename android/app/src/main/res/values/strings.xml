@@ -52,7 +52,7 @@
     <string name="about_greeting">Hey there, Pleb.</string>
     <string name="about_stack_sats">Stay humble, stack sats.</string>
     <string name="about_donate">Please consider donating if you receive value from this app.</string>
-    <string name="btn_donate">⚡ Donate</string>
+    <string name="btn_donate">⚡ Donate ⚡</string>
     <string name="lightning_address">timmy2383@strike.me</string>
     <string name="no_wallet_message">It looks like you may not have a compatible Bitcoin Lightning wallet installed. Consider installing one today.</string>
     <string name="lightning_address_message">Donations can be sent to&#160;</string>

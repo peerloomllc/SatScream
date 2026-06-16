@@ -71,7 +71,7 @@ struct AboutView: View {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         openLightningWallet()
                     } label: {
-                        Text("⚡ Donate")
+                        Text("⚡ Donate ⚡")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(colors.btnText)
                         .frame(width: 250, height: 48)
