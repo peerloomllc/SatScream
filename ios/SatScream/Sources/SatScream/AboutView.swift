@@ -71,13 +71,14 @@ struct AboutView: View {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         openLightningWallet()
                     } label: {
-                        Text("⚡ Donate")
+                        Text("⚡ Donate ⚡")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(colors.btnText)
                         .frame(width: 250, height: 48)
                         .background(colors.textPrimary)
-                        .cornerRadius(8)
+                        .clipShape(Capsule())
                     }
+                    .buttonStyle(PressableButtonStyle())
 
                     // No wallet message (revealed on failed lightning open)
                     if showNoWallet {
@@ -100,8 +101,9 @@ struct AboutView: View {
                             .foregroundColor(colors.btnText)
                             .frame(width: 250, height: 44)
                             .background(colors.textPrimary)
-                            .cornerRadius(8)
+                            .clipShape(Capsule())
                         }
+                        .buttonStyle(PressableButtonStyle())
                         .padding(.top, 12)
                         .opacity(learnMoreOpacity)
                     }
