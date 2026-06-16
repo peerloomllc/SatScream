@@ -54,8 +54,9 @@ struct WelcomeView: View {
                                     .foregroundColor(colors.btnText)
                                     .frame(width: 150, height: 44)
                                     .background(colors.textPrimary)
-                                    .cornerRadius(8)
+                                    .clipShape(Capsule())
                             }
+                            .buttonStyle(PressableButtonStyle())
 
                             // Continue button
                             Button {
@@ -67,8 +68,9 @@ struct WelcomeView: View {
                                     .foregroundColor(colors.btnText)
                                     .frame(width: 150, height: 44)
                                     .background(colors.btnPump)
-                                    .cornerRadius(8)
+                                    .clipShape(Capsule())
                             }
+                            .buttonStyle(PressableButtonStyle())
                         }
                         .padding(.top, 32)
                         .opacity(buttonsOpacity)
