@@ -6,6 +6,9 @@
     <string name="back">Back</string>
     <string name="information">Information</string>
     <string name="audio_settings">Audio Settings</string>
+    <string name="widget_background">Widget Background</string>
+    <string name="widget_bg_transparent">Widget background: transparent</string>
+    <string name="widget_bg_theme">Widget background: app theme</string>
     <string name="pump_alert_icon">Pump alert icon</string>
     <string name="dump_alert_icon">Dump alert icon</string>
 

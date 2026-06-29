@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Transparent widget: no container, text floats on the wallpaper. White glyphs with a
+     strong opaque dark halo (the "subtitle" treatment) stay legible on light/busy wallpapers
+     where a soft shadow alone washes out. BitcoinWidget selects this layout when the user
+     picks the transparent option and forces the text color to white. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/widgetRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tvWidgetPrice"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="$0"
+            android:textSize="48sp"
+            android:textColor="#FFFFFF"
+            android:fontFamily="sans-serif-thin"
+            android:gravity="center"
+            android:maxLines="1"
+            android:shadowColor="#FF000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="6"/>
+
+    </LinearLayout>
+
+</FrameLayout>

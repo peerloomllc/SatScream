@@ -386,6 +386,9 @@ class BitcoinViewModel: ObservableObject {
     func toggleDarkMode(_ value: Bool) {
         isDarkMode = value
         defaults.set(value, forKey: Prefs.darkMode)
+        // Repaint the home-screen widget so it tracks the app theme immediately, rather than
+        // staying stale until the next price fetch.
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Notifications

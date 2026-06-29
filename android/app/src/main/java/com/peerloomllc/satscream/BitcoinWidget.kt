@@ -54,6 +54,7 @@ class BitcoinWidget : AppWidgetProvider() {
             val price = prefs.getFloat(Prefs.LAST_PRICE, 0f).toDouble()
             val isBitcoinStandardMode = prefs.getBoolean(Prefs.BITCOIN_STANDARD_MODE, false)
             val isDarkMode = prefs.getBoolean(Prefs.DARK_MODE, false)
+            val isTransparent = prefs.getBoolean(Prefs.WIDGET_TRANSPARENT, false)
 
             // Get widget dimensions for dynamic text sizing
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
@@ -64,8 +65,13 @@ class BitcoinWidget : AppWidgetProvider() {
             val smallerDimension = minOf(minWidth, minHeight)
             val textSize = (smallerDimension * 0.5f).coerceAtLeast(24f)  // Minimum 24sp
 
-            // Create RemoteViews
-            val views = RemoteViews(context.packageName, R.layout.widget_layout)
+            // Create RemoteViews. Transparent mode uses a dedicated layout whose text carries a
+            // strong opaque halo so it stays legible on any wallpaper; the themed layout keeps a
+            // crisp container.
+            val views = RemoteViews(
+                context.packageName,
+                if (isTransparent) R.layout.widget_layout_transparent else R.layout.widget_layout
+            )
 
             // Format and set price based on mode
             val priceText = if (isBitcoinStandardMode) {
@@ -81,21 +87,25 @@ class BitcoinWidget : AppWidgetProvider() {
             // Set dynamic text size based on widget dimensions (50% of smaller dimension)
             views.setTextViewTextSize(R.id.tvWidgetPrice, TypedValue.COMPLEX_UNIT_SP, textSize)
 
-            // Set theme-aware colors using hardcoded values to avoid resource lookup issues
-            val textPrimaryColor = if (isDarkMode) {
-                Color.parseColor("#E0E0E0")  // text_primary_dark
+            if (isTransparent) {
+                // No container — force white glyphs; the layout's dark halo provides contrast on
+                // any wallpaper.
+                views.setTextColor(R.id.tvWidgetPrice, Color.WHITE)
             } else {
-                Color.parseColor("#212121")  // text_primary_light
+                // Theme-aware text color (hardcoded to avoid resource lookup issues) over a
+                // theme-aware rounded background. The static drawable avoids allocating a fresh
+                // 400x400 ARGB_8888 bitmap on every widget update.
+                val textPrimaryColor = if (isDarkMode) {
+                    Color.parseColor("#E0E0E0")  // text_primary_dark
+                } else {
+                    Color.parseColor("#212121")  // text_primary_light
+                }
+                views.setTextColor(R.id.tvWidgetPrice, textPrimaryColor)
+                views.setImageViewResource(
+                    R.id.widgetBackground,
+                    if (isDarkMode) R.drawable.widget_background_dark else R.drawable.widget_background_light
+                )
             }
-
-            views.setTextColor(R.id.tvWidgetPrice, textPrimaryColor)
-
-            // Theme-aware rounded background as a static drawable — avoids allocating a fresh
-            // 400x400 ARGB_8888 bitmap on every widget update.
-            views.setImageViewResource(
-                R.id.widgetBackground,
-                if (isDarkMode) R.drawable.widget_background_dark else R.drawable.widget_background_light
-            )
 
             // Create intent to launch MainActivity when widget is clicked
             val intent = Intent(context, MainActivity::class.java)

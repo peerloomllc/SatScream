@@ -158,18 +158,38 @@
 
     </ScrollView>
 
-    <!-- Dark Mode Toggle - sun/moon icon, fixed at bottom center -->
-    <ImageButton
-        android:id="@+id/btnDarkMode"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+    <!-- Bottom-center controls: dark-mode toggle + widget background toggle -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_margin="@dimen/spacing_large"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_sun"
-        android:stateListAnimator="@animator/btn_press_scale"
-        android:contentDescription="@string/dark_mode"
-        app:tint="@color/text_secondary" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Dark Mode Toggle - sun/moon icon -->
+        <ImageButton
+            android:id="@+id/btnDarkMode"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_sun"
+            android:stateListAnimator="@animator/btn_press_scale"
+            android:contentDescription="@string/dark_mode"
+            app:tint="@color/text_secondary" />
+
+        <!-- Widget Background Toggle - theme vs transparent -->
+        <ImageButton
+            android:id="@+id/btnWidgetBg"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_widget"
+            android:stateListAnimator="@animator/btn_press_scale"
+            android:contentDescription="@string/widget_background"
+            app:tint="@color/text_secondary" />
+
+    </LinearLayout>
 
     <!-- Info Icon - Fixed at bottom right -->
     <ImageButton
