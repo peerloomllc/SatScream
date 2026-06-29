@@ -5,6 +5,7 @@ struct MainView: View {
     @State private var showPumpSheet = false
     @State private var showDumpSheet = false
     @State private var showAudio      = false
+    @State private var showAbout      = false
     @State private var toastMessage: String? = nil
 
     // Each alert fire launches a fresh burst of 20–30 rockets, each at a random
@@ -135,7 +136,7 @@ struct MainView: View {
                 }
                 .frame(width: geo.size.width)
 
-                // Bottom bar: audio | dark mode toggle
+                // Bottom bar: audio | dark mode toggle | info/about
                 VStack {
                     Spacer()
                     ZStack {
@@ -143,8 +144,7 @@ struct MainView: View {
                         .frame(height: 64)
                         .shadow(color: colors.divider, radius: 1, y: -1)
 
-                        // Two icons, evenly distributed (Info/About button removed —
-                        // it linked to a page with a donate button).
+                        // Three icons, evenly distributed.
                         HStack {
                             Spacer()
 
@@ -171,6 +171,19 @@ struct MainView: View {
                                 .frame(width: 48, height: 48)
                                 .symbolReplaceTransition()
                                 .animation(.easeInOut(duration: 0.25), value: viewModel.isDarkMode)
+                            }
+                            .buttonStyle(PressableButtonStyle())
+
+                            Spacer()
+
+                            // Info/About button — opens AboutView (app info + donate).
+                            Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                showAbout = true
+                            } label: {
+                                Image(systemName: "info.circle")
+                                .foregroundColor(colors.textSecondary)
+                                .frame(width: 48, height: 48)
                             }
                             .buttonStyle(PressableButtonStyle())
 
@@ -210,6 +223,11 @@ struct MainView: View {
         }
         .sheet(isPresented: $showAudio) {
             AudioSettingsView()
+            .environmentObject(viewModel)
+            .sheetChrome()
+        }
+        .sheet(isPresented: $showAbout) {
+            AboutView()
             .environmentObject(viewModel)
             .sheetChrome()
         }
