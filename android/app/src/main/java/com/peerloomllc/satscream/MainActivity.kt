@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvPrice: TextView
     private lateinit var tvLastUpdated: TextView
     private lateinit var btnDarkMode: ImageButton
+    private lateinit var btnWidgetBg: ImageButton
 
     // Alert buttons
     private lateinit var btnSetPumpAlert: Button
@@ -112,6 +113,7 @@ class MainActivity : AppCompatActivity() {
         tvPrice = findViewById(R.id.tvPrice)
         tvLastUpdated = findViewById(R.id.tvLastUpdated)
         btnDarkMode = findViewById(R.id.btnDarkMode)
+        btnWidgetBg = findViewById(R.id.btnWidgetBg)
 
         btnSetPumpAlert = findViewById(R.id.btnSetPumpAlert)
         tvPumpAlertStatus = findViewById(R.id.tvPumpAlertStatus)
@@ -135,6 +137,9 @@ class MainActivity : AppCompatActivity() {
 
         // Setup Dark Mode toggle (after views are initialized)
         setupDarkModeToggle(isDarkMode)
+
+        // Setup widget background toggle (theme vs transparent)
+        setupWidgetBackgroundToggle()
 
         // Setup info button
         setupInfoButton()
@@ -182,6 +187,33 @@ class MainActivity : AppCompatActivity() {
                 if (newMode) AppCompatDelegate.MODE_NIGHT_YES
                 else AppCompatDelegate.MODE_NIGHT_NO
             )
+        }
+    }
+
+    private fun setupWidgetBackgroundToggle() {
+        val sharedPrefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+
+        // A dimmed icon hints "see-through"; full opacity hints a solid themed container.
+        fun reflectState(transparent: Boolean) {
+            btnWidgetBg.alpha = if (transparent) 0.5f else 1.0f
+        }
+        reflectState(sharedPrefs.getBoolean(Prefs.WIDGET_TRANSPARENT, false))
+
+        btnWidgetBg.setOnClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            val newTransparent = !sharedPrefs.getBoolean(Prefs.WIDGET_TRANSPARENT, false)
+
+            sharedPrefs.edit { putBoolean(Prefs.WIDGET_TRANSPARENT, newTransparent) }
+            reflectState(newTransparent)
+
+            // Repaint widgets with the new background
+            BitcoinWidget.updateAllWidgets(this)
+
+            Toast.makeText(
+                this,
+                if (newTransparent) R.string.widget_bg_transparent else R.string.widget_bg_theme,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

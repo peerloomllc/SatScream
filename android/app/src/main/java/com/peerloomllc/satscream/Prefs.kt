@@ -27,6 +27,10 @@ object Prefs {
     const val DARK_MODE = "DARK_MODE"
     const val WELCOME_SHOWN = "WELCOME_SHOWN"
 
+    // When true the home-screen widget draws no container (text floats on the
+    // wallpaper); when false it follows the app's light/dark theme.
+    const val WIDGET_TRANSPARENT = "WIDGET_TRANSPARENT"
+
     const val CUSTOM_PUMP_AUDIO_PATH = "CUSTOM_PUMP_AUDIO_PATH"
     const val CUSTOM_DUMP_AUDIO_PATH = "CUSTOM_DUMP_AUDIO_PATH"
     const val CUSTOM_PUMP_AUDIO_NAME = "CUSTOM_PUMP_AUDIO_NAME"
