@@ -484,6 +484,17 @@ class BitcoinService : Service() {
         }
     }
 
+    // Defense-in-depth for the Android 15+ foreground-service runtime cap.
+    // The service is declared specialUse, which is NOT time-limited, so this
+    // should never fire. But if a build/manifest regression ever reverted the
+    // type to a time-limited one (e.g. dataSync), the system would call this at
+    // the cap and expect us to stop within seconds -- failing to do so throws
+    // ForegroundServiceDidNotStopInTimeException and crashes the app. Stopping
+    // cleanly here trades a silent stop for a daily crash.
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        stopSelf()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()

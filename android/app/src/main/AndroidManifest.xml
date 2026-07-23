@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
         tools:ignore="ForegroundServicesPolicy" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Declare which apps we query for Lightning wallet support -->
@@ -91,7 +91,19 @@
             android:name=".BitcoinService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="specialUse">
+            <!--
+                specialUse rather than dataSync: dataSync is capped at ~6h of
+                cumulative runtime per 24h on Android 15+, after which the system
+                calls onTimeout() and force-crashes the service. This app needs an
+                always-on foreground service to keep polling the live BTC price and
+                fire pump/dump alerts, which fits no time-limited FGS type.
+                The property value below is the Play Console justification.
+            -->
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Continuously monitors the live Bitcoin price to deliver the user-configured pump and dump price alerts and keep the price notification and home-screen widget up to date." />
+        </service>
 
         <!-- Receiver to restart service after device reboot -->
         <receiver
