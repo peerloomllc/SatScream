@@ -1,9 +1,13 @@
 import WidgetKit
 import SwiftUI
 import Foundation
+import AppIntents
 
 // Shared App Group suite name — must match BitcoinViewModel
 private let suiteName = "group.com.peerloomllc.satscream"
+
+// Widget kind, shared between the configuration and the refresh intent
+private let widgetKind = "SatScreamWidget"
 
 // MARK: - Timeline Entry
 
@@ -41,8 +45,11 @@ struct PriceProvider: TimelineProvider {
             }
 
             let entry = makeEntry(freshPrice: fresh)
-            // WidgetKit enforces a minimum ~15 min refresh; we request every 15 min
-            let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+            // Ask for 5 min. iOS will not grant all of these - it rations reloads out of a
+            // daily budget (roughly 40-70) and spends them around the times the user is
+            // actually on the device. Asking often is how we get the most of that budget
+            // during active use; the system throttles the rest.
+            let nextUpdate = Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
             completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
         }
     }
@@ -148,6 +155,25 @@ private enum PriceFetcher {
     }
 }
 
+// MARK: - Tap-to-Refresh Intent
+
+/// Interactive widgets (iOS 17+) are the only way to refresh on demand: iOS gives
+/// widgets no "the user is looking at me" callback, so a deliberate tap is the closest
+/// thing to an instant update. Reloading the timeline runs `getTimeline`, which fetches.
+@available(iOS 17.0, *)
+struct RefreshPriceIntent: AppIntent {
+    static var title: LocalizedStringResource = "Refresh Bitcoin Price"
+    static var description = IntentDescription("Fetches the current Bitcoin price for the widget.")
+
+    // Keep it out of Shortcuts and Spotlight - it only makes sense from the widget.
+    static var isDiscoverable: Bool = false
+
+    func perform() async throws -> some IntentResult {
+        WidgetCenter.shared.reloadTimelines(ofKind: widgetKind)
+        return .result()
+    }
+}
+
 // MARK: - Widget View
 
 struct SatScreamWidgetView: View {
@@ -179,14 +205,34 @@ struct SatScreamWidgetView: View {
     }
 
     var body: some View {
-        Text(entry.priceText)
-            .font(.system(size: fontSize, weight: .thin, design: .default))
-            .foregroundColor(textColor)
-            .minimumScaleFactor(0.3)
-            .lineLimit(1)
-            .padding(10)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .widgetBackground(bgColor)
+        ZStack(alignment: .topTrailing) {
+            Text(entry.priceText)
+                .font(.system(size: fontSize, weight: .thin, design: .default))
+                .foregroundColor(textColor)
+                .minimumScaleFactor(0.3)
+                .lineLimit(1)
+                .padding(10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            refreshButton
+        }
+        .widgetBackground(bgColor)
+    }
+
+    /// Small, deliberately low-contrast so it doesn't compete with the price. Tapping it
+    /// refreshes in place; tapping anywhere else still opens the app as before.
+    @ViewBuilder
+    private var refreshButton: some View {
+        if #available(iOS 17.0, *) {
+            Button(intent: RefreshPriceIntent()) {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(textColor.opacity(0.4))
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 6)
+            .padding(.trailing, 8)
+        }
     }
 }
 
@@ -210,7 +256,7 @@ private extension View {
 
 @main
 struct SatScreamWidget: Widget {
-    let kind = "SatScreamWidget"
+    let kind = widgetKind
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: PriceProvider()) { entry in
