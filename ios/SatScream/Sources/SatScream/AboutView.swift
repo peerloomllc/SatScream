@@ -13,7 +13,7 @@ struct AboutView: View {
     @State private var showWebView = false
     @State private var toastMessage: String? = nil
 
-    private let lightningAddress = "timmy2383@strike.me"
+    private let lightningAddress = "peerloomllc@strike.me"
     private var colors: AppColors { AppColors(isDark: viewModel.isDarkMode) }
 
     // Version string - mirrors AboutActivity's dynamic version lookup
