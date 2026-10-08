@@ -38,6 +38,8 @@ rsync -az --delete \
   --exclude='.gradle' --exclude='android/.kotlin' \
   --exclude='ios/SatScream/.build' --exclude='ios/SatScream/build' \
   --exclude='ios/SatScream/SatScream.xcodeproj' \
+  --exclude='/*.apk' --exclude='/*.aab' --exclude='/*.AppImage' --exclude='/*.deb' --exclude='/*.exe' \
+  --exclude='/*.dmg' --exclude='/*.ipa' --exclude='/*.sha256' --exclude='/*.blockmap' --exclude='/latest*.yml' \
   "$REPO_ROOT/" "${MAC_MINI}:${MAC_REPO_PATH}/"
 
 # ── 2. Generate project + build (signed) on the Mac mini ────────────────────
